@@ -1,0 +1,22 @@
+#! /bin/csh -f
+
+# specify the scratch directory where object files as well as
+# restart and large output data file will be located :
+
+
+# specify (GNU) make utility
+
+setenv GNUMAKE 'make -j8'
+
+#--------------------------------------------
+#--------------------------------------------
+#--------------------------------------------
+#--------------------------------------------
+# You don't need to edit below this line.
+
+
+setenv SAM_DIR  /rotor/data/AQRP/UTIL
+
+$GNUMAKE -f $SAM_DIR/Makefile
+
+

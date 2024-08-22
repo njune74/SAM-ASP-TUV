@@ -1,0 +1,15 @@
+This directory contains some sample output files, generated
+with the TUV model.  Five different cases are given, using
+different default input files:
+
+INPUT :  OUTPUT   LOG
+________________________
+defin1:  usrout1  tuvlog1
+defin2:  usrout2  tuvlog2
+defin3:  usrout3  tuvlog3
+defin4:  usrout4  tuvlog4
+defin5:  sq_wrf   tuvlog5
+___________________________________________________________
+Last build:  19 January 2018 
+(some minor changes, mostly in 4th sign. digit)
+by S. Madronich

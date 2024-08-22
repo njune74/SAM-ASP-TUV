@@ -1,0 +1,2 @@
+lat,lon,year,month,day,hour,minute,Massemis,
+47.20317,-120.25683,2013,8,9,18,49,4.86e-06,

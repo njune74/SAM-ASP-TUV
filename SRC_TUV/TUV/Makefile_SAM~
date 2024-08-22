@@ -1,0 +1,79 @@
+# Makefile for TUV 5.0
+# Use with disort (discrete ordinate), or ps2str (2 stream approximation, 
+# pseudo-spherical correction)
+#----------
+# EXC      : name of executable
+# INCLUDES : required include files
+# USE_INCL : object files referencing include file (params)
+# FOBJS    : all required object files that do not use the include file
+#
+
+EXC = tuv_SAM
+
+TUV_LIB = libTuvLibrary.a
+TUV_DIR = /rotor/data/p2033/SAM-ASP_tuv/SRC_TUV/ASP/
+AR = ar
+AR_FLAGS = -rv
+
+INCLUDES = params 
+
+USE_INCL = TUV4SAMASP.o \
+           grids.o \
+           rdinp.o rdetfl.o rdxs.o \
+           swphys.o swbiol.o swchem.o rxn.o qys.o \
+           wshift.o \
+	   vpair.o vptmp.o vpo3.o \
+	   odrl.o odo3.o \
+           setaer.o setalb.o setcld.o setsnw.o \
+           setno2.o seto2.o setso2.o \
+           sphers.o  \
+	   la_srb.o \
+           rtrans.o \
+	   savout.o \
+           newlst.o \
+           wrflut.o \
+           waters.o \
+           swdom.o 
+
+FOBJS = numer.o functs.o orbit.o terint.o
+
+#----------
+# FC   : FORTRAN compiler 
+#        Linux users:  try FC = g77
+#        Cray users :  try FC = f90
+ FC = ifort
+
+# FFLAGS : command line options to compiler call (if not set, default is
+#          probably some basic optimization level)
+# FFLAGS = 
+#FFLAGS = -g -O2 -pad -fpe0 -g -traceback -debug extended #AD DEBUG
+
+# LIBS  : libraries required
+# LIBS =  
+
+#----------
+
+$(EXC):		$(FOBJS) $(USE_INCL) 
+		$(FC) $(FFLAGS) $(FOBJS) $(USE_INCL) $(LIBS) -o $@
+
+$(USE_INCL):	$(INCLUDES)
+
+.f.o:		
+		$(FC) $(FFLAGS) -c $*.f
+
+clean:		
+		rm -f core $(EXC) $(USE_INCL) $(FOBJS)
+
+all: $(FOBJS) $(USE_INCL)
+	$(AR) $(AR_FLAGS) $(TUV_LIB) $(FOBJS) $(USE_INCL) $(LIBS)
+
+install:
+	echo ""; \
+	if [ -a $(TUV_LIB) ]; then \
+		echo "Moving TUV Library '$(TUV_LIB)' to $(LIBRARY_INSTALL_DIR)"; \
+		mv $(TUV_LIB) $(LIBRARY_INSTALL_DIR); \
+		echo "TUV library '$(TUV_LIB)' successfully installed in $(LIBRARY_INSTALL_DIR)'"; \
+	else \
+		echo "*** Error: Cannot install TUV library '$(TUV_LIB)' ***";\
+		echo "*** Did you forget to run a 'make all' first? ***";\
+	fi;

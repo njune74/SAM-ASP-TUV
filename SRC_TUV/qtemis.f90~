@@ -1,0 +1,104 @@
+!     **************************************************
+!     *  qtemis                                        *
+!     **************************************************
+
+!     WRITTEN BY Robin Stevens, June 2009
+
+!     Adds water vapour to a specified grid box, and increases the temperature
+!     assuming linear, complete mixing of emissions with the ambient air in the
+!     gridbox. It is assumed that the mass flux of emissions in each timestep
+!     is small compared to the total mass of air in the gridbox.
+
+!-----OUTPUTS-----------------------------------------------------------
+
+      SUBROUTINE qtemis(dtn,emisH2O,emismass,emistemp,ex,ey,ez)
+
+      use grid, only:         dx, dy, dz, pres, zi
+      use microphysics, only: q, qn, micro_proc
+      use params, only:       fac_cond, fac_sub, rgas
+      use vars, only:         gamaz, P, qci, qcl, qpi, qpl, t, tabs
+      implicit none
+
+!-----ARGUMENT DECLARATIONS---------------------------------------------
+
+      real dtn                   ! timestep (s)
+      double precision emisH2O   ! water vapour of emissions (% by mass)
+      double precision emismass  ! total mass of emissions (kg s-1)
+      double precision emistemp  ! temperature of emissions (K)
+      integer ex,ey,ez           ! gridbox to emit to
+
+!-----VARIABLE DECLARATIONS---------------------------------------------
+
+      double precision ddt       ! timescale in double precision (s)
+      double precision boxmass   ! mass of emissions gridbox before emissions (kg)
+      double precision boxvol    ! volume of emissions gridbox (m3)
+      double precision totmass   ! total mass of emissions gridbox (kg)
+      double precision airdens   ! density of air (kg/m3)
+      double precision emist     ! MSE of emissions (K)
+
+
+!     variables used from other modules:
+!     grid:
+!        dx,dy,dz -  width of gridbox in x,y,z direction (m)
+!        pres     -  pressure at scalar levels (mb)
+!        zi       -  height of interface levels (m)
+!     microphysics:
+!        q        -  total water mixing ratio (kg H2O/kg air) [prognostic]
+!        qn       -  non-precipitating condensate (kg H2O/kg air) [prognostic]
+!     params:
+!        fac_cond -  lcond/cp (K)
+!        fac_sub  -  lsub/cp (K)
+!        rgas     -  gas constant for dry air (m3 Pa K-1 kg-1)
+!     vars:
+!        gamaz    -  ggr/cp*z (K)
+!        P        -  pressure (mb) [diagnostic]
+!        qci      -  ice water    (condensate)    (kg H2O/kg air)[diagnostic]
+!        qcl      -  liquid water (condensate)    (kg H2O/kg air)[diagnostic]
+!        qpi      -  ice water    (precipitation) (kg H2O/kg air)[diagnostic]
+!        qpl      -  liquid water (precipitation) (kg H2O/kg air)[diagnostic]
+!        t        -  moist static energy (K) [prognostic]
+!        tabs     -  temperature (K)[diagnostic]
+
+!-----ADJUSTABLE PARAMETERS---------------------------------------------
+
+
+!-----CODE--------------------------------------------------------------
+
+      ddt = dble(dtn)
+
+      ! Find volume of emmissions gridbox
+      if (ez.eq.1) then
+         boxvol = dble(dx*dy*dz) ! in m3
+      else
+         boxvol = dble(dx*dy*(zi(ez)-zi(ez-1))) ! in m3
+      endif
+
+      ! calculate mass of air in gridbox
+      ! here we are assuming dry air, but it shouldn't be hard to edit
+      ! this to consider the water vapour in the gridbox, using rv (in params)
+      airdens = dble(pres(ez)+p(ex,ey,ez))*100.d0 / (rgas*tabs(ex,ey,ez)) ! in kg/m3
+      boxmass = boxvol*airdens ! in kg
+
+      ! calculate mass flux from emissions
+      totmass = emismass*ddt + boxmass ! in kg
+
+      if (emistemp.gt.200.0) then
+         ! simulate the heat added by the plume - assume linear temperature mixing
+         emist = emistemp+gamaz(ez)- fac_cond * (qcl(ex,ey,ez)+qpl(ex,ey,ez)) -&
+                                 fac_sub *(qci(ex,ey,ez) + qpi(ex,ey,ez))
+         t(ex,ey,ez) = (boxmass/totmass)*t(ex,ey,ez)+(emismass*ddt/totmass)*emist
+         tabs(ex,ey,ez) = (boxmass/totmass)*tabs(ex,ey,ez)+(emismass*ddt/totmass)*emistemp
+      endif
+
+      if (emisH2O.gt.0.0) then
+         ! add water from effluent
+         q(ex,ey,ez) = (boxmass/totmass)*q(ex,ey,ez)+(emismass*ddt/totmass)*emisH2O
+         ! call micro_proc() to balance vapour and condensate, and 
+         ! update qv, qcl, and qci appropriately. This is a little
+         ! wasteful, as micro_proc() loops over the entire gridspace,
+         ! and not just the emissions gridbox.
+         call micro_proc()
+      endif
+
+   return
+   end

@@ -1,0 +1,1329 @@
+subroutine find_chem
+
+use grid, only: dx, dy, dz, pres, zi	
+use params
+use tracers
+implicit none
+
+
+
+FUNCTION FindChem(Chem) RESULT (Index)
+
+  USE domain, ONLY: ntracers
+  USE tracers, ONLY: tracername
+  IMPLICIT NONE
+  INTEGER				  :: i, Index, Phase
+  CHARACTER*(*)		  :: Chem
+  LOGICAL, OPTIONAL     :: SuppressError
+  LOGICAL				  :: LocalSuppressError
+
+  DO i = 1, ntracers
+     IF (Trim(Chem) .eq. Trim(tracername(i))) THEN
+        Index = i
+        EXIT
+     END IF
+  END DO
+
+  RETURN
+END FUNCTION
+
+
+
+
+
+
+
+!nfields=ntracers+ngas+3!! number of 3D fields to save 
+nfields=41+10+19!! number of 3D fields to save
+
+if(.not.docloud) nfields=nfields-1
+if(.not.doprecip) nfields=nfields-1
+!bloss: add 3D outputs for microphysical fields specified by flag_micro3Dout
+!       except for water vapor (already output as a SAM default).
+if(docloud) nfields=nfields+SUM(flag_micro3Dout)-flag_micro3Dout(index_water_vapor)
+
+if((dolongwave.or.doshortwave).and..not.doradhomo) nfields=nfields+1
+if(compute_reffc.and.(dolongwave.or.doshortwave).and.rad3Dout) nfields=nfields+1
+if(compute_reffi.and.(dolongwave.or.doshortwave).and.rad3Dout) nfields=nfields+1
+
+nfields1=0
+
+if(masterproc.or.output_sep) then
+
+  if(output_sep) then
+     write(rankchar,'(i4)') rank
+     sepchar="_"//rankchar(5-lenstr(rankchar):4)
+  else
+     sepchar=""
+  end if
+  write(rankchar,'(i4)') nsubdomains
+  write(timechar,'(i10)') nstep
+  do k=1,11-lenstr(timechar)-1
+    timechar(k:k)='0'
+  end do
+
+  if(RUN3D) then
+    if(save3Dbin) then
+      filetype = '.bin3D'
+    else
+      filetype = '.com3D'
+    end if
+    filename='./OUT_3D/'//trim(case)//'_'//trim(caseid)//'_'// &
+        rankchar(5-lenstr(rankchar):4)//'_'//timechar(1:10)//filetype//sepchar
+    open(46,file=filename,status='unknown',form='unformatted')
+
+  else
+    if(save3Dbin) then
+     if(save3Dsep) then
+       filetype = '.bin3D'
+     else
+       filetype = '.bin2D'
+     end if
+    else
+     if(save3Dsep) then
+       filetype = '.com3D'
+     else
+       filetype = '.com2D'
+     end if
+    end if
+    if(save3Dsep) then
+      filename='./OUT_3D/'//trim(case)//'_'//trim(caseid)//'_'// &
+        rankchar(5-lenstr(rankchar):4)//'_'//timechar(1:10)//filetype//sepchar
+      open(46,file=filename,status='unknown',form='unformatted')	
+    else
+      filename='./OUT_3D/'//trim(case)//'_'//trim(caseid)//'_'// &
+        rankchar(5-lenstr(rankchar):4)//filetype//sepchar
+      if(nrestart.eq.0.and.notopened3D) then
+         open(46,file=filename,status='unknown',form='unformatted')	
+      else
+         open(46,file=filename,status='unknown', &
+                              form='unformatted', position='append')
+      end if
+      notopened3D=.false.
+    end if  
+
+  end if
+
+  if(masterproc) then
+
+    if(save3Dbin) then
+
+      write(46) nx,ny,nzm,nsubdomains,nsubdomains_x,nsubdomains_y,nfields
+      do k=1,nzm
+        write(46) real(z(k),4)
+      end do
+      do k=1,nzm
+        write(46) real(pres(k),4)
+      end do
+      write(46) real(dx,4)
+      write(46) real(dy,4)
+      write(46) real(float(nstep)*dt/(3600.*24.)+day0,4)
+
+    else
+
+      write(long_name,'(8i4)') nx,ny,nzm,nsubdomains, &
+                                   nsubdomains_x,nsubdomains_y,nfields
+      do k=1,nzm
+         write(c_z(k),'(f12.3)') z(k)
+      end do
+      do k=1,nzm
+         write(c_p(k),'(f12.3)') pres(k)
+      end do
+      write(c_dx,'(f12.5)') dx
+      write(c_dy,'(f12.5)') dy
+      write(c_time,'(f12.5)') nstep*dt/(3600.*24.)+day0
+	
+      write(46) long_name(1:32)
+      write(46) c_time,c_dx,c_dy, (c_z(k),k=1,nzm),(c_p(k),k=1,nzm)
+
+    end if ! save3Dbin
+
+  end if ! masterproc
+ 
+end if ! masterproc.or.output_sep
+
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=u(i,j,k) + ug
+    end do
+   end do
+  end do
+  name='U'
+  long_name='X Wind Component'
+  units='m/s'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=v(i,j,k) + vg
+    end do
+   end do
+  end do
+  name='V'
+  long_name='Y Wind Component'
+  units='m/s'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=w(i,j,k)
+    end do
+   end do
+  end do
+  name='W'
+  long_name='Z Wind Component'
+  units='m/s'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=p(i,j,k)
+    end do
+   end do
+  end do
+  name='PP'
+  long_name='Pressure Perturbation'
+  units='Pa'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+if((dolongwave.or.doshortwave).and..not.doradhomo) then
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=qrad(i,j,k)*86400.
+    end do
+   end do
+  end do
+  name='QRAD'
+  long_name='Radiative heating rate'
+  units='K/day'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end if
+if(compute_reffc.and.(dolongwave.or.doshortwave).and.rad3Dout) then
+  nfields1=nfields1+1
+  tmp(1:nx,1:ny,1:nzm)=Get_reffc()
+  name='REL'
+  long_name='Effective Radius for Cloud Liquid Water'
+  units='mkm'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end if
+if(compute_reffi.and.(dolongwave.or.doshortwave).and.rad3Dout) then
+  nfields1=nfields1+1
+  tmp(1:nx,1:ny,1:nzm)=Get_reffi()
+  name='REI'
+  long_name='Effective Radius for Cloud Ice'
+  units='mkm'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end if
+
+
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=tabs(i,j,k)
+    end do
+   end do
+  end do
+  name='TABS'
+  long_name='Absolute Temperature'
+  units='K'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=qv(i,j,k)*1.e3
+    end do
+   end do
+  end do
+  name='QV'
+  long_name='Water Vapor'
+  units='g/kg'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+if(docloud) then
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=(qcl(i,j,k)+qci(i,j,k))*1.e3
+    end do
+   end do
+  end do
+  name='QN'
+  long_name='Non-precipitating Condensate (Water+Ice)'
+  units='g/kg'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end if
+
+
+if(doprecip) then
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=(qpl(i,j,k)+qpi(i,j,k))*1.e3
+    end do
+   end do
+  end do
+  name='QP'
+  long_name='Precipitating Water (Rain+Snow)'
+  units='g/kg'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end if
+
+!print*, '!!!!!!!! CHECK UNIT CONVERSTION IN write_fields3D.f90 !!!!!!!!! - CRL'
+
+write(*,*) 'In write_fields3D '
+do n=1,40
+  nfields1=nfields1+1
+
+   do i=1,nx
+      do j=1,ny
+         do l=1,nzm
+
+            tmp(i,j,l)=tracer(i,j,l,n) ! use for values averaged of nsteps3D (in kg)
+
+            tmp(i,j,l) = tmp(i,j,l)*airmw/GasMolecularMass(n)*1e9
+            std(i,j,l) = std(i,j,l)*airmw/GasMolecularMass(n)*1e9
+		
+    end do
+   end do
+  end do
+  name=tracername(n)
+  long_name=tracername(n)
+  units = '[ppb]'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+enddo
+
+nfields1=nfields1+1
+!write(*,*) 'In write_fields ',GasPhaseChemicalNames(167)! PANindex = 167
+do i=1,nx
+   do j=1,ny
+      do l=1,nzm
+            tmp(i,j,l)=tracer(i,j,l,167) ! use for values averaged of nsteps3D (in kg)
+	
+            tmp(i,j,l) = tmp(i,j,l)*airmw/GasMolecularMass(167)*1e9
+            std(i,j,l) = std(i,j,l)*airmw/GasMolecularMass(167)*1e9		
+      end do
+   end do
+end do
+name=tracername(167)
+long_name=tracername(167)
+units = '[ppb]'
+call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                               save3Dbin,dompi,rank,nsubdomains)
+
+if(dotracers) then
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=tkh(i,j,k)
+    end do
+   end do
+  end do
+  name='TKH'
+  long_name='Eddy diffusivity'
+  units='m2/s'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end if
+
+if(dotracers) then
+  nfields1=nfields1+1
+  do k=1,nzm
+   do j=1,ny
+    do i=1,nx
+      tmp(i,j,k)=tke(i,j,k)
+    end do
+   end do
+  end do
+  name='TKE'
+  long_name='Turbulent kinetic energy (resolved)'
+  units='m2/s2'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end if
+
+
+!TotOA
+nfields1=nfields1+1
+
+
+     !write(*,*)'TotOA = ', tracername(n),n
+     write(*,*)'TotOA = ', tracername(n),n
+     do n=1037,1486 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotOA(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+            do n=1037,1476 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+
+               TotOA(i,j,l) = TotOA(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+
+
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+
+name='TotOA'
+long_name='TotalOA'
+units = 'ug/m3'
+call compress3D(TotOA,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+!TotK
+ nfields1=nfields1+1
+
+     write(*,*)'TotK = '
+     do n=937,946 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotK(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=937,946 ! starting aerosol species after number of gas species 
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! kg/kg_air to ug/m3)
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+
+               TotK(i,j,l) = TotK(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     do n=747,756 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=747,756 ! starting aerosol species after number of gas species
+
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               
+               TotK(i,j,l) = TotK(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+
+     do n=697,716 ! starting aerosol species after number of gas species 
+        write(*,*)         tracername(n),n
+     end do! end nx!
+
+     !write(*,*)'TotK = ', tracername(n),n
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=697,716 ! starting aerosol species after number of gas species
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3
+
+               TotK(i,j,l) = TotK(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+
+     do n=727,746 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+
+     !K2SO4
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+            airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+            do n=727,737 ! starting aerosol species after number of gas species excluding BC
+
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwK)*MwK ! ug/m3
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwK)*MwK ! kg/kg_air to ug/m3
+
+               TotK(i,j,l) = TotK(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+
+     !write(*,*) 'TotK = ',tracername(n),n
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+            airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+            do n=737,746 ! starting aerosol species after number of gas species excluding BC
+
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3
+
+               TotK(i,j,l) = TotK(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+name='TotK'
+long_name='TotalK'
+units = 'ug/m3'
+call compress3D(TotK,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+! TotNA
+nfields1=nfields1+1
+     write(*,*) 'TotNA = '
+     do n=757,806 ! starting aerosol species after number of gas species 
+        write(*,*) tracername(n),n
+     end do! end nx!
+
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNa(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=757,786 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNa(i,j,l) = TotNa(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+     ! Na2SO4
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNa(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=787,796 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNa)*MwNa ! kg/kg_air to ug/m3
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNa)*MwNa ! ug/m3
+               TotNa(i,j,l) = TotNa(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNa(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=797,806 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNa(i,j,l) = TotNa(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+
+
+
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=947,956 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNa(i,j,l) = TotNa(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+name='TotNa'
+long_name='TotNa'
+units = 'ug/m3'
+call compress3D(TotNa,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+!TotNH4
+nfields1=nfields1+1
+         write(*,*) 'TotNH4 = '
+!     do n=637,646 ! starting aerosol species after number of gas species 
+!         write(*,*)        tracername(n),n
+!     end do! end nx!
+!     do i=1,nx
+!       do j=1,ny
+!         do l=1,nzm
+!            TotNH4(i,j,l) = 0.0 
+!            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+!            temptm = dble(tabs(i,j,l)) ! in K
+!	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+!            do n=637,646 ! starting aerosol species after number of gas species excluding BC
+!               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+!               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+!               TotNH4(i,j,l) = TotNH4(i,j,l) + tmp(i,j,l) ! in ug/m3
+!            end do ! end n
+!         end do	! end nz	
+!       end do! end ny
+!     end do! end nx!!
+
+!     do n=667,696 ! starting aerosol species after number of gas species 
+!         write(*,*)        tracername(n),n
+!     end do! end nx!
+!     do i=1,nx
+!       do j=1,ny
+!         do l=1,nzm
+!            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+!            temptm = dble(tabs(i,j,l)) ! in K
+!	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+!            do n=667,686 ! starting aerosol species after number of gas species excluding BC
+!               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! use for values averaged of nsteps3D (in kg)
+!               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+!               TotNH4(i,j,l) = TotNH4(i,j,l) + tmp(i,j,l) ! in ug/m3
+!            end do ! end n
+ !        end do	! end nz	
+ !      end do! end ny
+ !    end do! end nx!!
+
+!     do i=1,nx
+!       do j=1,ny
+!         do l=1,nzm
+!            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+!            temptm = dble(tabs(i,j,l)) ! in K
+!	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+!            do n=687,696 ! starting aerosol species after number of gas species excluding BC
+!               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNH4)*MwNH4 ! use for values averaged of nsteps3D (in kg)
+!               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNH4)*MwNH4 ! ug/m3
+!               TotNH4(i,j,l) = TotNH4(i,j,l) + tmp(i,j,l) ! in ug/m3
+!            end do ! end n
+!         end do	! end nz	
+!       end do! end ny
+!     end do! end nx!
+
+
+!
+
+!     do n=717,726 ! starting aerosol species after number of gas species 
+!         write(*,*)        tracername(n),n
+!     end do! end nx!
+!     do i=1,nx
+!       do j=1,ny
+!         do l=1,nzm
+!            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+!            temptm = dble(tabs(i,j,l)) ! in K
+!	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+!            do n=717,726 ! 
+!               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+!               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+!               TotNH4(i,j,l) = TotNH4(i,j,l) + tmp(i,j,l) ! in ug/m3
+!            end do ! end n
+!         end do	! end nz	
+!       end do! end ny
+!     end do! end nx!
+!     do n=807,816 ! starting aerosol species after number of gas species 
+!         write(*,*)        tracername(n),n
+!     end do! end nx!
+!     do i=1,nx
+!       do j=1,ny
+!         do l=1,nzm
+!            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+!            temptm = dble(tabs(i,j,l)) ! in K
+!	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+!            do n=807,816 ! 
+!               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+!               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+!               TotNH4(i,j,l) = TotNH4(i,j,l) + tmp(i,j,l) ! in ug/m3
+!            end do ! end n
+!         end do	! end nz	
+!       end do! end ny
+!     end do! end nx!
+     do n=927,936 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=927,936 !
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNH4(i,j,l) = TotNH4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+name='TotNH4'
+long_name='TotNH4'
+units = 'ug/m3'
+call compress3D(TotNH4,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+!TotCl-
+nfields1=nfields1+1
+         write(*,*)'TotCl  ='
+     do n=1007,1016 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotCl(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=1007,1016 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotCl(i,j,l) = TotCl(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! NH4Cl
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotCl(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=668,677 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotCl(i,j,l) = TotCl(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! KCl
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotCl(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=707,716 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotCl(i,j,l) = TotCl(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! NaCl
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotCl(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=797,806 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotCl(i,j,l) = TotCl(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! MgCl2
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotCl(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=817,826 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwCl)*MwCl ! ug/m3
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwCl)*MwCl ! ug/m3
+               TotCl(i,j,l) = TotCl(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! CaCl2
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotCl(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=817,826 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwCl)*MwCl ! ug/m3
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwCl)*MwCl ! ug/m3
+               TotCl(i,j,l) = TotCl(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+name='TotCl'
+long_name='TotCl'
+units = 'ug/m3'
+call compress3D(TotCl,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+!TotNO3-    
+nfields1=nfields1+1
+         write(*,*)'TotNO3'
+     do n=997,1006 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNO3(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=997,1006 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNO3(i,j,l) = TotNO3(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! NH4NO3
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNO3(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=677,686 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNO3(i,j,l) = TotNO3(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! KNO3
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNO3(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=747,756 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNO3(i,j,l) = TotNO3(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     !NaNO3
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNO3(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=777,786 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotNO3(i,j,l) = TotNO3(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     !MgNO32
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNO3(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=827,836 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNO3)*MwNO3! ug/m3
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNO3)*MwNO3 ! ug/m3
+               TotNO3(i,j,l) = TotNO3(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     !CaNO32
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotNO3(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=877,876 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNO3)*MwNO3! ug/m3
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwNO3)*MwNO3 ! ug/m3
+               TotNO3(i,j,l) = TotNO3(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+name='TotNO3'
+long_name='TotNO3'
+units = 'ug/m3'
+call compress3D(TotNO3,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+!TotSO4-
+nfields1=nfields1+1
+         write(*,*)'TotSO4'
+     do n=987,996 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=987,996 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! NH42SO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=687,696 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! K2SO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=727,736 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+
+     ! Na2SO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=787,796 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     ! HSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=737,746 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+    ! HSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=737,746 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx
+
+    ! NH4HSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=767,776 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+    ! KHSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=737,746 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+    ! NaHSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=767,776 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+    ! CaSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=887,896 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+    ! MgSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=837,846 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12! ug/m3
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+    ! MgHSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=857,866 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwSO4)*MwSO4! ug/m3
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwSO4)*MwSO4 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+   ! CaHSO4
+    do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSO4(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=907,916 ! starting aerosol species after number of gas species excluding BC
+               std(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwSO4)*MwSO4! ug/m3
+               tmp(i,j,l)=(2*tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12/MwSO4)*MwSO4 ! ug/m3
+               TotSO4(i,j,l) = TotSO4(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+name='TotSO4'
+long_name='TotSO4'
+units = 'ug/m3'
+call compress3D(TotSO4,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+!TotMg
+nfields1=nfields1+1
+         write(*,*)'TotMg'
+     do n=817,866 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotMg(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=817,866 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotMg(i,j,l) = TotMg(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+     do n=957,966 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=957,966 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotMg(i,j,l) = TotMg(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+name='TotMg'
+long_name='TotMg'
+units = 'ug/m3'
+call compress3D(TotMg,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+!TotCa
+nfields1=nfields1+1
+         write(*,*)'TotCa'
+     do n=867,916 ! starting aerosol species after number of gas species 
+         write(*,*)        tracername(n),n
+     end do! end nx!
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotCa(i,j,l) = 0.0
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa       
+            temptm = dble(tabs(i,j,l)) ! in K
+	    airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do n=867,916 ! starting aerosol species after number of gas species excluding BC
+               tmp(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               std(i,j,l)=tracer(i,j,l,n)*(airdenstm/Av*airmw)*1e12 ! ug/m3
+               TotCa(i,j,l) = TotCa(i,j,l) + tmp(i,j,l) ! in ug/m3
+            end do ! end n
+         end do	! end nz	
+       end do! end ny
+     end do! end nx!
+
+name='TotCa'
+long_name='TotCa'
+units = 'ug/m3'
+call compress3D(TotCa,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+! Number of Particles (No...)
+
+do n=1477,1486
+  nfields1=nfields1+1
+   do i=1,nx
+      do j=1,ny
+         do l=1,nzm!
+
+
+            prestm = dble(pres(l)+p(i,j,l))*100.d0 ! in Pa   
+            temptm = dble(tabs(i,j,l)) ! in K
+            airdenstm = prestm*Av/(gasc*temptm)/1e6 ! in molec/cm3
+
+            tmp(i,j,l) = tracer(i,j,l,n)*(airdenstm/Av*airmw*1e-3) ! use for values averaged of nsteps3D (in kg)
+            std(i,j,l) = tracer(i,j,l,n)*(airdenstm/Av*airmw*1e-3)
+            !write(*,*) 'In Write3D Aerosol', tracername(n),tmp(i,j,l)
+
+    end do
+   end do
+  end do
+  name=tracername(n)
+  long_name=tracername(n)
+  units = '#/cm3'
+  call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+end do
+
+
+do n = 1,nmicro_fields
+   if(docloud.AND.flag_micro3Dout(n).gt.0.AND.n.ne.index_water_vapor) then
+      nfields1=nfields1+1
+      do k=1,nzm
+         do j=1,ny
+            do i=1,nx
+               tmp(i,j,k)=micro_field(i,j,k,n)*mkoutputscale(n)
+            end do
+         end do
+         ! remove factor of rho from number, if this field is a number concentration
+         if(flag_number(n).gt.0) tmp(:,:,k) = tmp(:,:,k)*rho(k)
+      end do
+      name=TRIM(mkname(n))
+      long_name=TRIM(mklongname(n))
+      units=TRIM(mkunits(n))
+      call compress3D(tmp,nx,ny,nzm,name,long_name,units, &
+           save3Dbin,dompi,rank,nsubdomains)
+   end if
+end do
+
+  call task_barrier()
+
+  if(nfields.ne.nfields1) then
+    if(masterproc) print*,'write_fields3D error: nfields=',nfields,'  nfields1=',nfields1
+    call task_abort()
+  end if
+  if(masterproc) then
+    close (46)
+    if(RUN3D.or.save3Dsep) then
+       if(dogzip3D) call systemf('gzip -f '//filename)
+       print*, 'Writting 3D data. file:'//filename
+    else
+       print*, 'Appending 3D data. file:'//filename
+    end if
+  endif
+
+ 
+end
