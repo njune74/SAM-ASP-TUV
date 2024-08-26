@@ -1252,7 +1252,7 @@ SUBROUTINE ReadDistributionsOrganic ()
 	!! Open the Input Deck
 	FH = GetFileHandle()
         OPEN(UNIT=FH, FILE=TRIM(InputDeckSubDir)//'AerosolModes.in', STATUS='OLD')
-   
+   	WRITE(*,*) "AerosolModes.in Read from: ", InputDeckSubDir
 
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	!! Parse the INPUT FLAGS ahead of !!
@@ -1589,8 +1589,11 @@ SUBROUTINE ReadDistributionsOrganic ()
 	InsolCoresYesOrNo = .FALSE.
      
 	IF (Scaffolding) CALL Transcript(">>Exiting ReadDistributionsOrganic()<<")
-
+	
 	RETURN
+	WRITE(*,*) "Number In Dist: ",AerosolModes(1,1)
+	WRITE(*,*) "Diam In Dist: ", AerosolModes(1,2)
+	WRITE(*,*) "Sigma In Dist: ", AerosolModes(1,3)
 END SUBROUTINE ReadDistributionsOrganic
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -43,7 +43,7 @@
 !! 10/15  2007   Matt Alvarado     Fixed Assymetry parameter in 
 !!                                 ShellRefIndAndRad
 !! 08/30  2010   Matt Alvarado     Changed ShellRefIndandRad, 
-!!                                 AerosolOpticalDepth, and AerosolOptProp 
+
 !!                                 to allow 62 photolysis wavelengths
 !! 02/16  2012   Matt Alvarado     Removed Eulerian grids, making ASP        !!
 !!                                 a one-box model or subroutine.            !!
@@ -101,6 +101,7 @@
 !                        as a structure type declarator and a local variable
 !                        name; I have replaced the variable names with
 !                        "p_Particle"
+
 
 SUBROUTINE ResetAllOriginPressureLevels (OriginPressureLevel)
 
@@ -2222,7 +2223,7 @@ SUBROUTINE ShellRefIndAndRad(InParticle)
             call error("Unknown InParticle%EffectiveRadius range. STOP")
           END IF !InParticle%EffectiveRadius
 
-          ! Find core radius ratio
+          ! Find core radius ratio 
           radratio = InParticle%AbsCoreRad/InParticle%EffectiveRadius
           IF ((radratio .GT. 1e-09) .AND. (radratio .LE. 0.2)) THEN
             ratiobin = 1
@@ -2234,6 +2235,12 @@ SUBROUTINE ShellRefIndAndRad(InParticle)
             ratiobin = 4
           ELSE IF ((radratio .GT. 0.8) .AND. (radratio .LE. 0.99)) THEN
             ratiobin = 5
+          ELSE IF ((radratio .GT. 0.99)) THEN
+            ratiobin=5
+            WRITE(*,*) "Exceeded 0.99, force set"
+            WRITE(*,*) "InParticle%AbsCoreRad = ",InParticle%AbsCoreRad
+            WRITE(*,*) "InParticle%EffectiveRadius = ",InParticle%EffectiveRadius
+            WRITE(*,*) "radratio = ",radratio
           ELSE
             WRITE(*,*) "InParticle%AbsCoreRad = ",InParticle%AbsCoreRad
             WRITE(*,*) "InParticle%EffectiveRadius = ",InParticle%EffectiveRadius
