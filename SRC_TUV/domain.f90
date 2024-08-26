@@ -6,9 +6,9 @@ module domain
        integer, parameter :: nx_gl = 240 ! Number of grid points in X
 !       integer, parameter :: nx_gl = 6 ! Number of grid points in X  - MM DEBUG
        integer, parameter :: ny_gl = 1 ! Number of grid points in Y
-       integer, parameter :: nz_gl = 72 ! Number of pressure (scalar) levels
+       integer, parameter :: nz_gl = 80 ! Number of pressure (scalar) levels
 !       integer, parameter :: nz_gl = 3 ! Number of pressure (scalar) levels - MM DEBUG
-       integer, parameter :: nsubdomains_x  = 1 ! No of subdomains in x
+       integer, parameter :: nsubdomains_x  = 16 ! No of subdomains in x
        integer, parameter :: nsubdomains_y  = 1 ! No of subdomains in y
 
 
@@ -21,7 +21,7 @@ module domain
        integer, parameter :: navgmom_x = -1 
        integer, parameter :: navgmom_y = -1 
 
-       integer, parameter :: ntracers = 1487 ! number of transported tracers (dotracers=.true.)
+       integer, parameter :: ntracers = 1489 ! Changed +2, NJ 8/28/23 number of transported tracers (dotracers=.true.)
        !integer, parameter :: ntracers = 617 ! number of transported tracers (dotracers=.true.)
 ! Note:
 !  * nx_gl and ny_gl should be a factor of 2,3, or 5 (see User's Guide)

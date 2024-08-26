@@ -187,7 +187,7 @@ END FUNCTION
 		REAL*8 :: NumConcWeight(10)
 		REAL*8 :: MassConcWeight(10)
 	 	integer :: doAerosols
-                real*8,parameter :: CO_init = 10000.0 ! ppb
+                real*8,parameter :: CO_init = 3400.0 ! ppb
                 integer, parameter :: CO_index = 2
       ! ---------------------- end from ASP
 
@@ -290,16 +290,16 @@ IF(doAerosols.gt.0) then
 
 
 !AD DEBUG remove rank.eq.5 criterion
-if (rank.eq.0) then
+!if (rank.eq.0) then
 !if (rank.eq.5) then
-   write(*,*) 'Org Aerosols out of ASP'
-do j=1, 23
-   write(*,*) OrgPhaseChemicalNames(j)
-   write(*,*) 'EnvMass(:,j) = ',EnvMass(:,j+NumAq)
-   write(*,*) 'AeroMassConcCheck(:,j) = ',AeroMassConcCheck(:,j+NumAq)
-   write(*,*) 'AeroMass(:,j) = ',AeroMassConc(:,j+NumAq)
-enddo 
-endif
+!   write(*,*) 'Org Aerosols out of ASP'
+!do j=1, 23
+!   write(*,*) OrgPhaseChemicalNames(j)
+!   write(*,*) 'EnvMass(:,j) = ',EnvMass(:,j+NumAq)
+!   write(*,*) 'AeroMassConcCheck(:,j) = ',AeroMassConcCheck(:,j+NumAq)
+!   write(*,*) 'AeroMass(:,j) = ',AeroMassConc(:,j+NumAq)
+!enddo 
+!endif
 endif! do aerosols
 ! Specify the tracers' default names:
 
@@ -311,13 +311,13 @@ endif! do aerosols
    enddo
 
 NumAq = HowManyAqChems+HowManyAqCations+HowManyAqAnions
-write(*,*) NumAq
-write(*,*) 'HowManyEvolveGasChems = ',HowManyEvolveGasChems
-write(*,*) 'HowManyAqChems = ',HowManyAqChems
-write(*,*) 'HowManyAqCations = ',HowManyAqCations
-write(*,*) 'HowManyAqAnions = ',HowManyAqAnions
-write(*,*) 'HowManyOrgChems = ',HowManyOrgChems
-write(*,*) 'HowManyAqOrgChems = ',HowManyAqOrgChems
+!write(*,*) NumAq
+!write(*,*) 'HowManyEvolveGasChems = ',HowManyEvolveGasChems
+!write(*,*) 'HowManyAqChems = ',HowManyAqChems
+!write(*,*) 'HowManyAqCations = ',HowManyAqCations
+!write(*,*) 'HowManyAqAnions = ',HowManyAqAnions
+!write(*,*) 'HowManyOrgChems = ',HowManyOrgChems
+!write(*,*) 'HowManyAqOrgChems = ',HowManyAqOrgChems
 
 	!Find chemical indices for later
 	PotassiumIndex = FindChem("K+", 1)
@@ -368,49 +368,49 @@ write(*,*) 'HowManyAqOrgChems = ',HowManyAqOrgChems
 	CO2i = FindChem("CO2", 0)
 
 	!Printing chemical indices for later
-	write(*,*) 'Printing chemical indices for later'
-	write(*,*) PotassiumIndex, AqPhaseChemicalNames(PotassiumIndex), AqMolecularMass(PotassiumIndex)
+	!write(*,*) 'Printing chemical indices for later'
+	!write(*,*) PotassiumIndex, AqPhaseChemicalNames(PotassiumIndex), AqMolecularMass(PotassiumIndex)
  
-	write(*,*)	KNO3i , AqPhaseChemicalNames(KNO3i), AqMolecularMass(KNO3i)
-	write(*,*)	KCli , AqPhaseChemicalNames(KCli), AqMolecularMass(KCli)
-	write(*,*)	KHSO4i, AqPhaseChemicalNames(KHSO4i), AqMolecularMass(KHSO4i)
-	write(*,*)	K2SO4Index , AqPhaseChemicalNames(K2SO4Index), AqMolecularMass(K2SO4Index)
-	write(*,*)	K2SO4i , AqPhaseChemicalNames(K2SO4i), AqMolecularMass(K2SO4i)
- 	write(*,*)      KOHi , AqPhaseChemicalNames(KOHi), AqMolecularMass(KOHi)
+	!write(*,*)	KNO3i , AqPhaseChemicalNames(KNO3i), AqMolecularMass(KNO3i)
+	!write(*,*)	KCli , AqPhaseChemicalNames(KCli), AqMolecularMass(KCli)
+	!write(*,*)	KHSO4i, AqPhaseChemicalNames(KHSO4i), AqMolecularMass(KHSO4i)
+	!write(*,*)	K2SO4Index , AqPhaseChemicalNames(K2SO4Index), AqMolecularMass(K2SO4Index)
+	!write(*,*)	K2SO4i , AqPhaseChemicalNames(K2SO4i), AqMolecularMass(K2SO4i)
+ 	!write(*,*)      KOHi , AqPhaseChemicalNames(KOHi), AqMolecularMass(KOHi)
 		
-	write(*,*)	Nai , AqPhaseChemicalNames(Nai), AqMolecularMass(Nai)
-	write(*,*)	NaNO3i , AqPhaseChemicalNames(NaNO3i), AqMolecularMass(NaNO3i)
-	write(*,*)	NaCli , AqPhaseChemicalNames(NaCli), AqMolecularMass(NaCli)
-	write(*,*)	NaHSO4i , AqPhaseChemicalNames(NaHSO4i), AqMolecularMass(NaHSO4i)
-	write(*,*)	Na2SO4i , AqPhaseChemicalNames(Na2SO4i), AqMolecularMass(Na2SO4i)
-	write(*,*)      NaOHi , AqPhaseChemicalNames(NaOHi), AqMolecularMass(NaOHi)
+	!write(*,*)	Nai , AqPhaseChemicalNames(Nai), AqMolecularMass(Nai)
+	!write(*,*)	NaNO3i , AqPhaseChemicalNames(NaNO3i), AqMolecularMass(NaNO3i)
+	!write(*,*)	NaCli , AqPhaseChemicalNames(NaCli), AqMolecularMass(NaCli)
+	!write(*,*)	NaHSO4i , AqPhaseChemicalNames(NaHSO4i), AqMolecularMass(NaHSO4i)
+	!write(*,*)	Na2SO4i , AqPhaseChemicalNames(Na2SO4i), AqMolecularMass(Na2SO4i)
+	!write(*,*)      NaOHi , AqPhaseChemicalNames(NaOHi), AqMolecularMass(NaOHi)
 
-	write(*,*)	Mgi, AqPhaseChemicalNames(Mgi), AqMolecularMass(Mgi)
-	write(*,*)	MgNO32i , AqPhaseChemicalNames(MgNO32i), AqMolecularMass(MgNO32i)
-	write(*,*)	MgCl2i , AqPhaseChemicalNames(MgCl2i), AqMolecularMass(MgCl2i)
-	write(*,*)	MgHSO42i, AqPhaseChemicalNames(MgHSO42i), AqMolecularMass(MgHSO42i)
-	write(*,*)	MgSO4i , AqPhaseChemicalNames(MgSO4i), AqMolecularMass(MgSO4i)
-	write(*,*)      MgOH2i , AqPhaseChemicalNames(MgOH2i), AqMolecularMass(MgOH2i)
+	!write(*,*)	Mgi, AqPhaseChemicalNames(Mgi), AqMolecularMass(Mgi)
+	!write(*,*)	MgNO32i , AqPhaseChemicalNames(MgNO32i), AqMolecularMass(MgNO32i)
+	!write(*,*)	MgCl2i , AqPhaseChemicalNames(MgCl2i), AqMolecularMass(MgCl2i)
+	!write(*,*)	MgHSO42i, AqPhaseChemicalNames(MgHSO42i), AqMolecularMass(MgHSO42i)
+	!write(*,*)	MgSO4i , AqPhaseChemicalNames(MgSO4i), AqMolecularMass(MgSO4i)
+	!write(*,*)      MgOH2i , AqPhaseChemicalNames(MgOH2i), AqMolecularMass(MgOH2i)
 
-	write(*,*)	Cai, AqPhaseChemicalNames(Cai), AqMolecularMass(Cai)
-	write(*,*)	CaNO32i, AqPhaseChemicalNames(CaNO32i), AqMolecularMass(CaNO32i)
-	write(*,*)	CaCl2i , AqPhaseChemicalNames(CaCl2i), AqMolecularMass(CaCl2i)
-	write(*,*)	CaHSO42i , AqPhaseChemicalNames(CaHSO42i), AqMolecularMass(CaHSO42i)
-	write(*,*)	CaSO4i , AqPhaseChemicalNames(CaSO4i), AqMolecularMass(CaSO4i)
-	write(*,*)      CaOH2i , AqPhaseChemicalNames(CaOH2i), AqMolecularMass(CaOH2i)
+	!write(*,*)	Cai, AqPhaseChemicalNames(Cai), AqMolecularMass(Cai)
+	!write(*,*)	CaNO32i, AqPhaseChemicalNames(CaNO32i), AqMolecularMass(CaNO32i)
+	!write(*,*)	CaCl2i , AqPhaseChemicalNames(CaCl2i), AqMolecularMass(CaCl2i)
+	!write(*,*)	CaHSO42i , AqPhaseChemicalNames(CaHSO42i), AqMolecularMass(CaHSO42i)
+	!write(*,*)	CaSO4i , AqPhaseChemicalNames(CaSO4i), AqMolecularMass(CaSO4i)
+	!write(*,*)      CaOH2i , AqPhaseChemicalNames(CaOH2i), AqMolecularMass(CaOH2i)
 		
-	write(*,*)	NH3i, AqPhaseChemicalNames(NH3i), AqMolecularMass(NH3i)
-	write(*,*)	NH4i, AqPhaseChemicalNames(NH4i), AqMolecularMass(NH4i)
-	write(*,*)	NH4NO3i, AqPhaseChemicalNames(NH4NO3i), AqMolecularMass(NH4NO3i)
-	write(*,*)	NH4Cli , AqPhaseChemicalNames(NH4Cli), AqMolecularMass(NH4Cli)
-	write(*,*)	NH4HSO4i , AqPhaseChemicalNames(NH4HSO4i), AqMolecularMass(NH4HSO4i)
-	write(*,*)	NH42SO4i , AqPhaseChemicalNames(NH42SO4i), AqMolecularMass(NH42SO4i)
-	write(*,*)	LEVi , AqPhaseChemicalNames(LEVi), AqMolecularMass(LEVi)
+	!write(*,*)	NH3i, AqPhaseChemicalNames(NH3i), AqMolecularMass(NH3i)
+	!write(*,*)	NH4i, AqPhaseChemicalNames(NH4i), AqMolecularMass(NH4i)
+	!write(*,*)	NH4NO3i, AqPhaseChemicalNames(NH4NO3i), AqMolecularMass(NH4NO3i)
+	!write(*,*)	NH4Cli , AqPhaseChemicalNames(NH4Cli), AqMolecularMass(NH4Cli)
+	!write(*,*)	NH4HSO4i , AqPhaseChemicalNames(NH4HSO4i), AqMolecularMass(NH4HSO4i)
+	!write(*,*)	NH42SO4i , AqPhaseChemicalNames(NH42SO4i), AqMolecularMass(NH42SO4i)
+	!write(*,*)	LEVi , AqPhaseChemicalNames(LEVi), AqMolecularMass(LEVi)
 
-	write(*,*)	Cli , AqPhaseChemicalNames(Cli), AqMolecularMass(Cli)
-	write(*,*)	NO3i , AqPhaseChemicalNames(NO3i), AqMolecularMass(NO3i)
-	write(*,*)	SO4i, AqPhaseChemicalNames(SO4i), AqMolecularMass(SO4i)
-	write(*,*)	HSO4i , AqPhaseChemicalNames(HSO4i), AqMolecularMass(HSO4i)
+	!write(*,*)	Cli , AqPhaseChemicalNames(Cli), AqMolecularMass(Cli)
+	!write(*,*)	NO3i , AqPhaseChemicalNames(NO3i), AqMolecularMass(NO3i)
+	!write(*,*)	SO4i, AqPhaseChemicalNames(SO4i), AqMolecularMass(SO4i)
+	!write(*,*)	HSO4i , AqPhaseChemicalNames(HSO4i), AqMolecularMass(HSO4i)
 
 if(doAerosols.gt.0) then
 ! Aqueous Phase Chems
@@ -419,10 +419,10 @@ do binnum=1,HowManyBins
    do ntr = 1, NumAq! - 41 total AqPhaseChemicals  CRL
 
 		if (binnum.lt.10) then
-			write(tmp_name,'(i1)') binnum
+			!write(tmp_name,'(i1)') binnum
 			aero_name = trim(AqPhaseChemicalNames(ntr))//'0'//trim(tmp_name)
 		else
-			write(tmp_name,'(i2)') binnum
+			!write(tmp_name,'(i2)') binnum
 			aero_name = trim(AqPhaseChemicalNames(ntr))//trim(tmp_name)
 		endif
 
@@ -432,8 +432,8 @@ do binnum=1,HowManyBins
    enddo
 
 
-write(*,*)'!!!!!!!!!!!! '
-write(*,*)'Organic Phase Chems Names '
+!write(*,*)'!!!!!!!!!!!! '
+!write(*,*)'Organic Phase Chems Names '
 ! Organic Phase Chems
    do ntr = 1,HowManyOrgChems	
 		if (binnum.lt.10) then
@@ -480,8 +480,8 @@ write(*,*)'Organic Phase Chems Names '
 			aero_name = 'NoCo'//trim(tmp_name)
 		endif
 
-   		tracername(1476+binnum) = aero_name
-   		tracerunits(1476+binnum) = '[#/kg_air]'
+   		tracername(1478+binnum) = aero_name
+   		tracerunits(1478+binnum) = '[#/kg_air]'
 
 enddo ! binnum
 
@@ -680,22 +680,23 @@ enddo ! nx
 
       !cur_dist = 100-((plume_y-dy)/vg/dt)
       !cur_dist = 100+(((plume_y-dy)/vg/dt)*2)
-      cur_dist = (((plume_y-dy)/vg/dt)*2)
-      write(*,*)'In Tracer Physics:solar cur_dist = ',cur_dist
+      cur_dist = (((plume_y-dy)/vg/dt)*2)+1080
+      !write(*,*)'In Tracer Physics:solar cur_dist = ',cur_dist
       !if (cur_dist.lt.plume_y-dy) then
 
 
       ! Adding Fire Emissions if over fire
        !if (nstep.gt.cur_dist.and.nstep.lt.100) then  
-       if (nstep.gt.0.and.nstep.le.cur_dist) then 
-         write(*,*) 'cur_dist = ',cur_dist,' plume_y = ',plume_y,nstep
+       !if (nstep.gt.0.and.nstep.le.cur_dist) then 
+         !write(*,*) 'cur_dist = ',cur_dist,' plume_y = ',plume_y,nstep
          !write(*,*) 'rank L681 tracers_physics= ',rank !AD DEBUG
 !AD DEBUG remove rank criterion as this seems to stay at 0?
-               if (rank.eq.0) then !AD DEBUG
-!         if (rank.eq.5) then! only read in plume in the first slab of the 12 x-subdomains)
+      if (rank.eq.7) then !AD DEBUG
+         if (nstep.gt.1080.and.nstep.le.cur_dist) then
+         !if (rank.eq.5) then! only read in plume in the first slab of the 12 x-subdomains)
 	    !do iden = 100,101
-	    do iden = 10,11
-		do zden = 29,32
+	    do iden = 100,115
+		do zden = 32,55
 		     prestm = dble(pres(zden)*100.d0) +p(iden,emisgridy,zden)! in Pa  
 	             temptm = dble(tabs(iden,emisgridy,zden)) ! in K
 
@@ -703,12 +704,12 @@ enddo ! nx
                      airdenstm = prestm*Av/(gasc*temptm)/1e6 ! in molec/cm3
 
 		     ntrtrack = 1
-                     write(*,*) ' In fire initialization box',iden,zden,nstep
+                     !write(*,*) ' In fire initialization box',iden,zden,nstep
 		     do ntr=1, HowManyEvolveGasChems
-                        write(*,*) tracername(ntrtrack), tracer(iden,emisgridy,zden,ntrtrack)*airmw/GasMolecularMass(ntrtrack)*1e9! kg/kg_air to ppb
+                        !write(*,*) tracername(ntrtrack), tracer(iden,emisgridy,zden,ntrtrack)*airmw/GasMolecularMass(ntrtrack)*1e9! kg/kg_air to ppb
                		tracer(iden,emisgridy,zden,ntrtrack) = tracer(iden,emisgridy,zden,ntrtrack)+tracerfire(iden,emisgridy,zden,ntrtrack)! kg/kg_air! 
 
-                        write(*,*) tracername(ntrtrack), tracer(iden,emisgridy,zden,ntrtrack)*airmw/GasMolecularMass(ntrtrack)*1e9! kg/kg_air to ppb
+                        !write(*,*) tracername(ntrtrack), tracer(iden,emisgridy,zden,ntrtrack)*airmw/GasMolecularMass(ntrtrack)*1e9! kg/kg_air to ppb
 
 			ntrtrack = ntrtrack+1
    
@@ -721,7 +722,7 @@ enddo ! nx
 
 	   		   tracer(iden,emisgridy,zden,ntrtrack) = tracer(iden,emisgridy,zden,ntrtrack) + tracerfire(iden,emisgridy,zden,ntrtrack)! in kg/kg_air
                        !if (iden.eq.12.and.zden.eq.30) then
-                           write(*,*) tracername(ntrtrack), binnum,tracer(iden,emisgridy,zden,ntrtrack)*(airdenstm/Av*airmw)*1e12
+                           !write(*,*) tracername(ntrtrack), binnum,tracer(iden,emisgridy,zden,ntrtrack)*(airdenstm/Av*airmw)*1e12
                        !endif
 		       ntrtrack = ntrtrack+1
                       enddo
@@ -729,8 +730,8 @@ enddo ! nx
                        ! NumConc
                       tracer(iden,emisgridy,zden,1476+binnum) = tracer(iden,emisgridy,zden,1476+binnum)+ tracerfire(iden,emisgridy,zden,1476+binnum)! in #/kg_air
                       !if (i.eq.12.and.l.eq.30) then
-                        write(*,*) tracername(1476+binnum), binnum,tracer(iden,emisgridy,zden,1476+binnum)*(airdenstm/Av*airmw)*1e-3
-                        write(*,*)''
+                        !write(*,*) tracername(1476+binnum), binnum,tracer(iden,emisgridy,zden,1476+binnum)*(airdenstm/Av*airmw)*1e-3
+                        !write(*,*)''
                       !endif
                      enddo ! binnum
 
@@ -797,14 +798,14 @@ enddo ! nx
                if (i.eq.12.and.l.eq.30.and.nstep.lt.200) then !AD DEBUG
 !              if (rank.eq.5.and.i.eq.12.and.l.eq.30.and.nstep.lt.200) then
                   write(*,*) 'Before ASP is ever called...' ,nstep
-                  write(*,*) 'water = ',GasConc(1)
+                  !write(*,*) 'water = ',GasConc(1)
                   write(*,*) sum(MassConc(:,1)),MassConc(:,1)
-                  write(*,*) 'T = ',temptm
-                  write(*,*) 'P = ',prestm
-                  write(*,*) 'sza = ',solar_zenith_angle
-                  write(*,*) 'bf: API + OH (1381) = ',GasPhaseChemicalRates(1381)
-                  write(*,*) 'bf: API + O3 (1402) = ',GasPhaseChemicalRates(1402)
-                  write(*,*) 'bf: API + NO3 (1413) = ',GasPhaseChemicalRates(1413)
+                  !write(*,*) 'T = ',temptm
+                  !write(*,*) 'P = ',prestm
+                  !write(*,*) 'sza = ',solar_zenith_angle
+                  !write(*,*) 'bf: API + OH (1381) = ',GasPhaseChemicalRates(1381)
+                  !write(*,*) 'bf: API + O3 (1402) = ',GasPhaseChemicalRates(1402)
+                  !write(*,*) 'bf: API + NO3 (1413) = ',GasPhaseChemicalRates(1413)
               end if
 
 
@@ -812,7 +813,7 @@ enddo ! nx
             !IF (GasConc(2).gt.130.and.nstep.gt.200) THEN
 !            write(*,*) 'CO Conc gt 130 chk',GasConc(2)
             IF (GasConc(2).gt.130.and.nstep.gt.cur_dist) THEN	!AD DEBUG
-		write(*,*) 'Fire Loop CO Conc gt 130 chk',GasConc(2)
+		!write(*,*) 'Fire Loop CO Conc gt 130 chk',GasConc(2)
 !	     IF (.FALSE.) THEN 	 !AD DEBUG SKIP LOOP ENTIRELY
             	! Aerosol MassConc
             	! Aqueous Phase Chems + Org Phase + Aq Org Phase
@@ -841,121 +842,121 @@ enddo ! nx
                if (i.eq.12.and.l.eq.30) then
 !               if (rank.eq.5.and.i.eq.12.and.l.eq.30) then
                   write(*,*) 'Gas+Aerosol going into ASP...' ,nstep
-                  write(*,*) 'water = ',GasConc(1)
+                  !write(*,*) 'water = ',GasConc(1)
                   write(*,*) sum(MassConc(:,1)),MassConc(:,1)
-                  write(*,*) 'T = ',temptm
-                  write(*,*) 'P = ',prestm
-                  write(*,*) 'sza = ',solar_zenith_angle
-                  write(*,*) 'Mgas = ',Mgas
-                  write(*,*) ' SAMASP air dens = ',airdenstm
+                  !write(*,*) 'T = ',temptm
+                  !write(*,*) 'P = ',prestm
+                  !write(*,*) 'sza = ',solar_zenith_angle
+                  !write(*,*) 'Mgas = ',Mgas
+                  !write(*,*) ' SAMASP air dens = ',airdenstm
 
                   ntrtrack2 = 673
 
 
-                  do ntr=1,HowManyEvolveGasChems
+                  !do ntr=1,HowManyEvolveGasChems
                      !write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     if (ntr .EQ. findchem('CO', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('OH', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('NO', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('CO', 0)) then
+                        !write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('OH', 0)) then
+                        !write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('NO', 0)) then
+                      !  write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
-                     if (ntr .EQ. findchem('NO3', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('HO2', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('NO3', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('HO2', 0)) then
+                      !  write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
                      ! HC5SOA
-                     if (ntr .EQ. findchem('HC5', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('HC5', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
-                     if (ntr .EQ. findchem('HC5SOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('HC5SOA', 0)) then
+                      !  write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
                      !HC8SOA
-                     if (ntr .EQ. findchem('HC8', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('HC8SOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('HC8', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('HC8SOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
                      !OLTSOA
-                     if (ntr .EQ. findchem('OLT', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('OLTSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('OLT', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('OLTSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
                      
                      ! OLISOA
-                     if (ntr .EQ. findchem('OLI', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif             
-                      if (ntr .EQ. findchem('DIEN', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif         
-                     if (ntr .EQ. findchem('OLISOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('OLI', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif             
+                      !if (ntr .EQ. findchem('DIEN', 0)) then
+                      !  write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif         
+                     !if (ntr .EQ. findchem('OLISOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
                      !TOLSOA
-                     if (ntr .EQ. findchem('TOL', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('TOLSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('TOL', 0)) then
+                      !  write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('TOLSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
                      !XLYSOA
-                     if (ntr .EQ. findchem('XYM', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('XYP', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('XYO', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('CSL', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('XYLSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('XYM', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('XYP', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('XYO', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('CSL', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('XYLSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
                      ! ISOSOA
 
-                     if (ntr .EQ. findchem('ISOP', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('ISOSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('ISOP', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('ISOSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
 
                      ! TERPSOA
-                     if (ntr .EQ. findchem('API', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('LIM', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('TERPSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     endif
-                  enddo
+                     !if (ntr .EQ. findchem('API', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('LIM', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('TERPSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
+                     !endif
+                  !enddo
 
                   !do ntr = 1, HowManyAqChems+HowManyAqCations+HowManyAqAnions+HowManyOrgChems+HowManyAqOrgChems                  
                   do ntr = 56,64
 
-                        write(*,*) tracername(ntrtrack2-1), sum(MassConc(:,ntr)),MassConc(:,ntr)
+                        !write(*,*) tracername(ntrtrack2-1), sum(MassConc(:,ntr)),MassConc(:,ntr)
 			ntrtrack2 = ntrtrack2+1
                         t_TotOA = t_TotOA + sum(MassConc(:,ntr))
                   enddo
@@ -997,7 +998,7 @@ enddo ! nx
                 PhotolysisRates(50) = 0.16*PhotolysisRates(22)
                 PhotolysisRates(51) = 100*PhotolysisRates(25)
 
-		!write(*,*) "PhotolysisRates passed to SAM_wrapper: ", PhotolysisRates !AD DEBUG
+		write(*,*) "PhotolysisRates passed to SAM_wrapper: ", PhotolysisRates !AD DEBUG
 		!call flush(6) !AD DEBUG
 !write(*,*) "Fire Loop L990 sum(tracer(i,j,l,:))", sum(tracer(i,j,l,:)) !MM DEBUG
 !write(*,*) "Fire Loop tracers.f90 sum(tracer) L990", sum(tracer) !MM DEBUG
@@ -1114,118 +1115,118 @@ enddo ! nx
                if (i.eq.12.and.l.eq.30) then !AD DEBUG
 !               if (rank.eq.5.and.i.eq.12.and.l.eq.30) then
                   write(*,*) 'Gas+Aerosol after ASP...' ,nstep
-                  write(*,*) 'water = ',AfterGasConc(1)
+                  !write(*,*) 'water = ',AfterGasConc(1)
                   write(*,*) sum(MassConc(:,1)),MassConc(:,1)
-                  write(*,*) 'T = ',temptm
-                  write(*,*) 'P = ',prestm
-                  write(*,*) 'sza = ',solar_zenith_angle
-                  write(*,*) 'GasPhaseChemicalRates(NO3 -> NO #7) = ',GasPhaseChemicalRates(7)
-                  write(*,*) 'GasPhaseChemicalRates(NO3 -> NO2 #8) = ',GasPhaseChemicalRates(8)
+                  !write(*,*) 'T = ',temptm
+                  !write(*,*) 'P = ',prestm
+                  !write(*,*) 'sza = ',solar_zenith_angle
+                  !write(*,*) 'GasPhaseChemicalRates(NO3 -> NO #7) = ',GasPhaseChemicalRates(7)
+                  !write(*,*) 'GasPhaseChemicalRates(NO3 -> NO2 #8) = ',GasPhaseChemicalRates(8)
                   ntrtrack2 = 673
-                  do ntr=1,HowManyEvolveGasChems
+                  !do ntr=1,HowManyEvolveGasChems
                      !write(*,*) GasPhaseChemicalNames(ntr),   GasConc(ntr)  , ntr  
-                     if (ntr .EQ. findchem('CO', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('OH', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('NO', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('CO', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('OH', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('NO', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
-                     if (ntr .EQ. findchem('NO3', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('HO2', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('NO3', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('HO2', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
                      ! HC5SOA
-                     if (ntr .EQ. findchem('HC5', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('HC5', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
-                     if (ntr .EQ. findchem('HC5SOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('HC5SOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
                      !HC8SOA
-                     if (ntr .EQ. findchem('HC8', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('HC8SOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('HC8', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('HC8SOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
                      !OLTSOA
-                     if (ntr .EQ. findchem('OLT', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('OLTSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('OLT', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('OLTSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
                      
                      ! OLISOA
-                     if (ntr .EQ. findchem('OLI', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif             
-                      if (ntr .EQ. findchem('DIEN', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif         
-                     if (ntr .EQ. findchem('OLISOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('OLI', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif             
+                     ! if (ntr .EQ. findchem('DIEN', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif         
+                     !if (ntr .EQ. findchem('OLISOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
                      !TOLSOA
-                     if (ntr .EQ. findchem('TOL', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('TOLSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('TOL', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('TOLSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
                      !XLYSOA
-                     if (ntr .EQ. findchem('XYM', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('XYP', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('XYO', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('CSL', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('XYLSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('XYM', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('XYP', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('XYO', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('CSL', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('XYLSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
                      ! ISOSOA
 
-                     if (ntr .EQ. findchem('ISOP', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('ISOSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('ISOP', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('ISOSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
                      ! TERPSOA
-                     if (ntr .EQ. findchem('API', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('LIM', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
-                     if (ntr .EQ. findchem('TERPSOA', 0)) then
-                        write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
-                     endif
+                     !if (ntr .EQ. findchem('API', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('LIM', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
+                     !if (ntr .EQ. findchem('TERPSOA', 0)) then
+                     !   write(*,*) GasPhaseChemicalNames(ntr),   AfterGasConc(ntr)  , ntr  
+                     !endif
 
-                  enddo
+                  !enddo
 
                   !do ntr = 1, HowManyAqChems+HowManyAqCations+HowManyAqAnions+HowManyOrgChems+HowManyAqOrgChems
                   do ntr = 56, 64
-                       write(*,*) tracername(ntrtrack2-1), sum(MassConc(:,ntr)),MassConc(:,ntr)
+                       !write(*,*) tracername(ntrtrack2-1), sum(MassConc(:,ntr)),MassConc(:,ntr)
                        t_TotOA = t_TotOA + sum(MassConc(:,ntr))
                        ntrtrack2 = ntrtrack2+1
                   enddo
@@ -1244,7 +1245,7 @@ enddo ! nx
       !MJA 20190702 TODO: Call TUV to get photolysis rates for each column AFTER the main z loop is done
          !Call tuv
          !samtstart = hour - 7 !Convert from PST to UTC, kludge that will need to be fixed!
-         samtstart = hour -7 !MM DEBUG
+         samtstart = hour !MM DEBUG
          !MM DEBUG: kk and nwvn loops added after samAOD, samSSA, and samASYM
          !dimensions modified to match those in TUV4SAMASP
          DO kk = 1,nzm
@@ -1261,24 +1262,24 @@ enddo ! nx
          ENDDO !kk
 
          ! start MM DEBUG BLOCK
-         write(*,*) "tracers_physics:L1236 After reassignments, before tuv4samasp" 
+         !write(*,*) "tracers_physics:L1236 After reassignments, before tuv4samasp" 
          !WRITE(*,*) "shape(samAOD) = ", shape(samAOD)
          !WRITE(*,*) "shape(samSSA) = ", shape(samSSA)
          !WRITE(*,*) "shape(samASYM) = ", shape(samASYM)
-         IF ( ANY( samAOD <= 0) ) then
-            WRITE(*,*) "samAOD has a bad value <= 0"
-            WRITE(*,*) "samAOD = ", samAOD
-         END IF
+         !IF ( ANY( samAOD <= 0) ) then
+         !   WRITE(*,*) "samAOD has a bad value <= 0"
+         !   WRITE(*,*) "samAOD = ", samAOD
+         !END IF
                 
-         IF ( ANY( samSSA < 0) .OR. ANY(samSSA > 1.0)) then
-            WRITE(*,*) "samSSA has a bad value < 0 OR > 1.0"
-            WRITE(*,*) "samSSA = ", samSSA
-         END IF
+         !IF ( ANY( samSSA < 0) .OR. ANY(samSSA > 1.0)) then
+         !   WRITE(*,*) "samSSA has a bad value < 0 OR > 1.0"
+         !   WRITE(*,*) "samSSA = ", samSSA
+         !END IF
                 
-         IF ( ANY( samASYM < -1.0) .OR. ANY(samASYM > 1.0)) then
-            WRITE(*,*) "samASYM has a bad value < -1.0 OR > 1.0"
-            WRITE(*,*) "samASYM = ", samASYM
-         END IF
+         !IF ( ANY( samASYM < -1.0) .OR. ANY(samASYM > 1.0)) then
+         !   WRITE(*,*) "samASYM has a bad value < -1.0 OR > 1.0"
+         !   WRITE(*,*) "samASYM = ", samASYM
+         !END IF
          ! end MM DEBUG BLOCK
          
          write(*,*) "Before tuv4samasp", samtstart

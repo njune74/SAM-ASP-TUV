@@ -274,18 +274,18 @@ do while(nstep.lt.nstop.and.nelapse.gt.0)
 !  Tracers' physics:
 
       call tracers_physics()
-      write(*,*) "IN MAIN.F90 END TRACERS_PHYSICS CALL" !AD DEBUG
+      !write(*,*) "IN MAIN.F90 END TRACERS_PHYSICS CALL" !AD DEBUG
 !-----------------------------------------------------------
 !	Radiation
 
       if(dolongwave.or.doshortwave) then 
-        write(*,*) "IN MAIN.F90 radiation" !AD DEBUG
+        !write(*,*) "IN MAIN.F90 radiation" !AD DEBUG
 	call radiation()     
       end if
 
 !-----------------------------------------------------------
 !    Compute diagnostic fields:
-      write(*,*) "IN MAIN.F90 before diagnose" !AD DEBUG
+      !write(*,*) "IN MAIN.F90 before diagnose" !AD DEBUG
       call diagnose()
 
 !----------------------------------------------------------
