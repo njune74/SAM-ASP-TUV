@@ -2456,45 +2456,48 @@ XO2  + XO2         =>       M    ; 7.13e-17; 0.;2950.0; 1.
 !
 !Use XO2 rates for NO, NO3, and HO2 reactions, CH3O2 + RO2_T from MCM v3.2 for RO2_T
 !
-HC5SOA + NO        => NO  + 0.0108 IVOC4   ; 4.00e-12; 0.;0.0; 1. 
-HC5SOA + NO3       => NO3 + 0.0108 IVOC4   ; 1.20e-12; 0.;0.0; 1.
-HC5SOA + HO2       => HO2 + 0.0217 IVOC4   ; 1.66e-13; 0.;1300.0; 1.
-HC5SOA             => 0.0217 IVOC4         ;12. ; 1.480e-12;	0.;	520.;	1. 
+OXYARO + OH        => 0.068 IVOC5 + 0.0597 IVOC6 + 0.2183 IVOC8 + OH             ; 6.30e-11 ; 0.0; 0.; 1.
+OTHERO + OH        => 0.004 IVOC5 + 0.0244 IVOC6 + 0.0726 IVOC7 + 0.254 IVOC8 + OH; 7.20e-11 ; 0.0; 0.; 1.
 !
-HC8SOA + NO        => NO  + 0.0687 IVOC4   ; 4.00e-12; 0.;0.0; 1. 
-HC8SOA + NO3       => NO3 + 0.0687 IVOC4   ; 1.20e-12; 0.;0.0; 1.
-HC8SOA + HO2       => HO2 + 0.1373 IVOC4   ; 1.66e-13; 0.;1300.0; 1.
-HC8SOA             => 0.1373 IVOC4         ;12. ; 1.480e-12;	0.;	520.;	1.
+HC5SOA + NO        => NO  + 0.0108 IVOC4   ; 0.00; 0.;0.0; 1. 
+HC5SOA + NO3       => NO3 + 0.0108 IVOC4   ; 0.00; 0.;0.0; 1.
+HC5SOA + HO2       => HO2 + 0.0217 IVOC4   ; 0.00; 0.;1300.0; 1.
+HC5SOA             => 0.0217 IVOC4         ;12. ; 0.00;	0.;	520.;	1. 
 !
-OLTSOA + NO        => NO  + 0.0001 IVOC3 + 0.0076 IVOC4 + 0.0063 IVOC5 + 0.0253 IVOC6   ; 4.00e-12; 0.;0.0; 1. 
-OLTSOA + NO3       => NO3 + 0.0001 IVOC3 + 0.0076 IVOC4 + 0.0063 IVOC5 + 0.0253 IVOC6   ; 1.20e-12; 0.;0.0; 1.
-OLTSOA + HO2       => HO2 + 0.0008 IVOC3 + 0.0015 IVOC4 + 0.0101 IVOC5 + 0.0380 IVOC6   ; 1.66e-13; 0.;1300.0; 1.
-OLTSOA             => 0.0008 IVOC3 + 0.0015 IVOC4 + 0.0101 IVOC5 + 0.0380 IVOC6         ;12. ; 1.480e-12;	0.;	520.;	1. 
+HC8SOA + NO        => NO  + 0.0687 IVOC4   ; 0.00; 0.;0.0; 1. 
+HC8SOA + NO3       => NO3 + 0.0687 IVOC4   ; 0.00; 0.;0.0; 1.
+HC8SOA + HO2       => HO2 + 0.1373 IVOC4   ; 0.00; 0.;1300.0; 1.
+HC8SOA             => 0.1373 IVOC4         ;12. ; 0.00;	0.;	520.;	1.
 !
-OLISOA + NO        => NO  + 0.0008 IVOC3 + 0.0070 IVOC4 + 0.0225 IVOC5 + 0.0737 IVOC6   ; 4.00e-12; 0.;0.0; 1. 
-OLISOA + NO3       => NO3 + 0.0008 IVOC3 + 0.0070 IVOC4 + 0.0225 IVOC5 + 0.0737 IVOC6   ; 1.20e-12; 0.;0.0; 1.
-OLISOA + HO2       => HO2 + 0.0061 IVOC3 + 0.0119 IVOC4 + 0.0352 IVOC5 + 0.1024 IVOC6   ; 1.66e-13; 0.;1300.0; 1.
-OLISOA             => 0.0061 IVOC3 + 0.0119 IVOC4 + 0.0352 IVOC5 + 0.1024 IVOC6         ;12. ; 1.480e-12;	0.;	520.;	1. 
+OLTSOA + NO        => NO  + 0.0001 IVOC3 + 0.0076 IVOC4 + 0.0063 IVOC5 + 0.0253 IVOC6   ; 0.00; 0.;0.0; 1. 
+OLTSOA + NO3       => NO3 + 0.0001 IVOC3 + 0.0076 IVOC4 + 0.0063 IVOC5 + 0.0253 IVOC6   ; 0.00; 0.;0.0; 1.
+OLTSOA + HO2       => HO2 + 0.0008 IVOC3 + 0.0015 IVOC4 + 0.0101 IVOC5 + 0.0380 IVOC6   ; 0.00; 0.;1300.0; 1.
+OLTSOA             => 0.0008 IVOC3 + 0.0015 IVOC4 + 0.0101 IVOC5 + 0.0380 IVOC6         ;12. ; 0.00;	0.;	520.;	1. 
 !
-TOLSOA + NO        => NO  + 0.0011 IVOC3 + 0.0610 IVOC4 + 0.1108 IVOC5 + 0.1607 IVOC6   ; 4.00e-12; 0.;0.0; 1.
-TOLSOA + NO3       => NO3 + 0.0011 IVOC3 + 0.0610 IVOC4 + 0.1108 IVOC5 + 0.1607 IVOC6   ; 1.20e-12; 0.;0.0; 1.
-TOLSOA + HO2       => HO2 + 0.0277 IVOC3 + 0.0831 IVOC4 + 0.1386 IVOC5 + 0.1940 IVOC6   ; 1.66e-13; 0.;1300.0; 1.
-TOLSOA             => 0.0277 IVOC3 + 0.0831 IVOC4 + 0.1386 IVOC5 + 0.1940 IVOC6         ;12. ; 1.480e-12;	0.;	520.;	1. 
+OLISOA + NO        => NO  + 0.0008 IVOC3 + 0.0070 IVOC4 + 0.0225 IVOC5 + 0.0737 IVOC6   ; 0.00; 0.;0.0; 1. 
+OLISOA + NO3       => NO3 + 0.0008 IVOC3 + 0.0070 IVOC4 + 0.0225 IVOC5 + 0.0737 IVOC6   ; 0.00; 0.;0.0; 1.
+OLISOA + HO2       => HO2 + 0.0061 IVOC3 + 0.0119 IVOC4 + 0.0352 IVOC5 + 0.1024 IVOC6   ; 0.00; 0.;1300.0; 1.
+OLISOA             => 0.0061 IVOC3 + 0.0119 IVOC4 + 0.0352 IVOC5 + 0.1024 IVOC6         ;12. ; 0.00;	0.;	520.;	1. 
 !
-XYLSOA + NO        => NO  + 0.0006 IVOC3 + 0.0830 IVOC4 + 0.1277 IVOC5 + 0.1852 IVOC6   ; 4.00e-12; 0.;0.0; 1. 
-XYLSOA + NO3       => NO3 + 0.0006 IVOC3 + 0.0830 IVOC4 + 0.1277 IVOC5 + 0.1852 IVOC6   ; 1.20e-12; 0.;0.0; 1.
-XYLSOA + HO2       => HO2 + 0.0319 IVOC3 + 0.1277 IVOC4 + 0.1596 IVOC5 + 0.2235 IVOC6   ; 1.66e-13; 0.;1300.0; 1.
-XYLSOA             => 0.0319 IVOC3 + 0.1277 IVOC4 + 0.1596 IVOC5 + 0.2235 IVOC6         ;12. ; 1.480e-12;	0.;	520.;	1. 
+TOLSOA + NO        => NO  + 0.1448 IVOC2 + 0.1078 IVOC3                                 ; 0.00; 0.;0.0; 1.
+TOLSOA + NO3       => NO3 + 0.1448 IVOC2 + 0.1078 IVOC3                                 ; 0.00; 0.;0.0; 1.
+TOLSOA + HO2       => HO2 + 0.0306 IVOC1 + 0.0001 IVOC2 + 0.0783 IVOC3 + 0.1860 IVOC4   ; 0.00; 0.;1300.0; 1.
+TOLSOA             => 0.0306 IVOC1 + 0.0001 IVOC2 + 0.0783 IVOC3 + 0.1860 IVOC4          ;12. ; 0.00;	0.;	520.;	1. 
 !
-ISOSOA + NO        => NO  + 0.0001 IVOC3 + 0.0061 IVOC4 + 0.0041 IVOC5   ; 4.00e-12; 0.;0.0; 1. 
-ISOSOA + NO3       => NO3 + 0.0001 IVOC3 + 0.0061 IVOC4 + 0.0041 IVOC5   ; 1.20e-12; 0.;0.0; 1.
-ISOSOA + HO2       => HO2 + 0.0025 IVOC3 + 0.0082 IVOC4 + 0.0041 IVOC5   ; 1.66e-13; 0.;1300.0; 1.
-ISOSOA             => 0.0025 IVOC3 + 0.0082 IVOC4 + 0.0041 IVOC5         ;12. ; 1.480e-12;	0.;	520.;	1. 
+XYLSOA + NO        => NO  + 0.0262 IVOC2 + 0.0047 IVOC3 + 0.0425 IVOC4 + 0.1703 IVOC5   ; 0.00; 0.;0.0; 1. 
+XYLSOA + NO3       => NO3 + 0.0262 IVOC2 + 0.0047 IVOC3 + 0.0425 IVOC4 + 0.1703 IVOC5   ; 0.00; 0.;0.0; 1.
+XYLSOA + HO2       => HO2 + 0.1344 IVOC2 + 0.0430 IVOC4 + 1.4477 IVOC5                  ; 0.00; 0.;1300.0; 1.
+XYLSOA             => 0.1344 IVOC2 + 0.0430 IVOC4 + 1.4477 IVOC5                        ;12. ; 0.00;	0.;	520.;	1. 
 !
-TERPSOA + NO        => NO  + 0.0066 IVOC3 + 0.0664 IVOC4 + 0.1098 IVOC5 + 0.2769 IVOC6   ; 4.00e-12; 0.;0.0; 1. 
-TERPSOA + NO3       => NO3 + 0.0066 IVOC3 + 0.0664 IVOC4 + 0.1098 IVOC5 + 0.2769 IVOC6   ; 1.20e-12; 0.;0.0; 1.
-TERPSOA + HO2       => HO2 + 0.0586 IVOC3 + 0.0501 IVOC4 + 0.1959 IVOC5 + 0.3318 IVOC6   ; 1.66e-13; 0.;1300.0; 1.
-TERPSOA             => 0.0586 IVOC3 + 0.0501 IVOC4 + 0.1959 IVOC5 + 0.3318 IVOC6         ;12. ; 1.480e-12;	0.;	520.;	1. 
+ISOSOA + NO        => NO  + 0.0001 IVOC3 + 0.0061 IVOC4 + 0.0041 IVOC5   ; 0.00; 0.;0.0; 1. 
+ISOSOA + NO3       => NO3 + 0.0001 IVOC3 + 0.0061 IVOC4 + 0.0041 IVOC5   ; 0.00; 0.;0.0; 1.
+ISOSOA + HO2       => HO2 + 0.0025 IVOC3 + 0.0082 IVOC4 + 0.0041 IVOC5   ; 0.00; 0.;1300.0; 1.
+ISOSOA             => 0.0025 IVOC3 + 0.0082 IVOC4 + 0.0041 IVOC5         ;12. ; 0.00;	0.;	520.;	1. 
+!
+TERPSOA + NO        => NO  + 0.0263 IVOC1 + 0.0565 IVOC2 + 0.0476 IVOC3 + 0.1236 IVOC4   ; 0.00; 0.;0.0; 1. 
+TERPSOA + NO3       => NO3 + 0.0263 IVOC1 + 0.0565 IVOC2 + 0.0476 IVOC3 + 0.1236 IVOC4   ; 0.00; 0.;0.0; 1.
+TERPSOA + HO2       => HO2 + 0.0602 IVOC1 + 0.0242 IVOC2 + 0.0414 IVOC3 + 0.0858 IVOC4   ; 0.00; 0.;1300.0; 1.
+TERPSOA             => 0.0602 IVOC1 + 0.0242 IVOC2 + 0.0414 IVOC3 + 0.0858 IVOC4         ;12. ; 0.00;	0.;	520.;	1. 
 !Ahmadov Reactions (Ahmadov et al., ACP, 2012)
 !IVOC2 + OH => 1.075 IVOC1 						; 1.0e-11; 0.;  0.;         1.
 !IVOC3 + OH => 1.075 IVOC2 						; 1.0e-11; 0.;  0.;         1.
@@ -2523,14 +2526,14 @@ TERPSOA             => 0.0586 IVOC3 + 0.0501 IVOC4 + 0.1959 IVOC5 + 0.3318 IVOC6
 !IVOC8 + OH => 1.075 IVOC7 						; 4.0e-11; 0.;  0.;         1.
 !IVOC9 + OH => 1.075 IVOC8 						; 4.0e-11; 0.;  0.;         1.
 !Half Ahmadov, half frag Reactions
-IVOC2 + OH => 0.5375 IVOC1 + 0.5375 IVOC3				; 1.0e-11; 0.;  0.;         1.
-IVOC3 + OH => 0.5375 IVOC2 + 0.5375 IVOC4				; 1.0e-11; 0.;  0.;         1.
-IVOC4 + OH => 0.5375 IVOC3 + 0.5375 IVOC5				; 1.0e-11; 0.;  0.;         1.
-IVOC5 + OH => 0.5375 IVOC4 + 0.5375 IVOC6				; 1.0e-11; 0.;  0.;         1.
-IVOC6 + OH => 0.5375 IVOC5 + 0.5375 IVOC7 				; 1.0e-11; 0.;  0.;         1.
-IVOC7 + OH => 0.5375 IVOC6 + 0.5375 IVOC8 				; 1.0e-11; 0.;  0.;         1.
-IVOC8 + OH => 0.5375 IVOC7 + 0.5375 IVOC9 				; 1.0e-11; 0.;  0.;         1.
-IVOC9 + OH => 0.5375 IVOC8 						; 1.0e-11; 0.;  0.;         1.
+!IVOC2 + OH => 1.075 IVOC1 + 0.0 IVOC3				; 1.0e-11; 0.;  0.;         1.
+!IVOC3 + OH => 1.075 IVOC2 + 0.0 IVOC4				; 1.0e-11; 0.;  0.;         1.
+!IVOC4 + OH => 1.075 IVOC3   				                ; 1.0e-11; 0.;  0.;         1.
+!IVOC5 + OH => 0.5375 IVOC4 + 0.5375 IVOC6		                ; 1.0e-11; 0.;  0.;         1.
+!IVOC6 + OH => 0.5375 IVOC5 + 0.5375 IVOC7 				; 1.0e-11; 0.;  0.;         1.
+!IVOC7 + OH => 0.5375 IVOC6 + 0.5375 IVOC8 				; 1.0e-11; 0.;  0.;         1.
+!IVOC8 + OH => 0.5375 IVOC7 + 0.5375 IVOC9 				; 1.0e-11; 0.;  0.;         1.
+!IVOC9 + OH => 0.5375 IVOC8 						; 1.0e-11; 0.;  0.;         1.
 !Half Ahmadov, half frag Reactions with NOx/HOx chem  - same as Williams Fire
 !IVOC2 + OH  => 0.5375 IVOC1 + 0.5375 IVOC3 + 0.600 HO2 + IVOC1_R1O2	; 1.0e-11; 0.;  0.;         1.
 !IVOC3 + OH  => 0.5375 IVOC2 + 0.5375 IVOC4 + 0.600 HO2 + IVOC1_R1O2	; 1.0e-11; 0.;  0.;         1.

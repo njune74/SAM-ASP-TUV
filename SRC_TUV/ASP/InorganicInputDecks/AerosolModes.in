@@ -158,20 +158,34 @@ F !!
 !IVOC7; 16.3194;
 !IVOC8; 47.8369;
 !
+!!Below IVOC distribution more volatile than  Grieshop et al. (2009), unID'd 50% logC*=5
+!234000 ; 0.1 ; 1.9
+!Williams Mod Grieshop
+!NH4Cl; 15.28
+!NH4NO3; 36.65
+!KCl; 2.074
+!K2SO4; 1.451
+!BC; 175.1
+!IVOC3; 0.0
+!IVOC4; 161.7528
+!IVOC5; 365.99970
+!IVOC6; 256.2099
+!IVOC7; 37.4257
+!IVOC8; 27.6145
+!!IVOC1; 848.9936
 !Below IVOC distribution more volatile than  Grieshop et al. (2009), unID'd 50% logC*=5
-234000 ; 0.1 ; 1.9
-Williams Mod Grieshop
-NH4Cl; 15.28
-NH4NO3; 36.65
-KCl; 2.074
-K2SO4; 1.451
-BC; 175.1
-IVOC3; 0.0
-IVOC4; 161.7528
-IVOC5; 365.99970
-IVOC6; 256.2099
-IVOC7; 37.4257
-IVOC8; 27.6145
+634000 ; 0.09 ; 1.5
+Williams Flats Mod
+NH4Cl; 1.0
+NH4NO3; 2.0
+KCl; 0.5
+K2SO4; 1.0
+BC; 2.5
+IVOC1; 18.6
+IVOC2; 9.3
+IVOC3; 27.9
+IVOC4; 37.2
+
 !IVOC1; 848.9936
 !
 !100 ; 1.6 ; 1.1; 
