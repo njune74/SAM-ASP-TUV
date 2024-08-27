@@ -104,7 +104,7 @@ logical notopenedmom ! flag to see if the statistical moment file is opened
 
 real:: dx =0. 	! grid spacing in x direction
 real:: dy =0.	! grid spacing in y direction
-real:: dz =0.	! constant grid spacing in z direction (when dz_constant=.true.)
+real:: dz =40.	! constant grid spacing in z direction (when dz_constant=.true.)
 logical:: doconstdz = .false.  ! do constant vertical grid spacing set by dz
 
 integer:: nstop =0   ! time step number to stop the integration

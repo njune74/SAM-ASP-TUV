@@ -62,12 +62,12 @@ CPD3 <=> CPD3		; 0.1;          0.;    1232.0; 16.5; 3.35e-3 ; 1.0
 ! Psat matches MW's from Greishop et al., ACP, 2009.    
 ! Reaction      ; Mass Acc ; Flag       ; Psat(300K)    ; Delta Hvap (KJ/mol)  
 IVOC1 <=> IVOC1	; 0.1;          1.	; 4.760e-10	; 77.  
-IVOC2 <=> IVOC2	; 0.1;          1.	; 5.207e-9	; 73.  
-IVOC3 <=> IVOC3	; 0.1;          1.	; 5.747e-8	; 69.   
-IVOC4 <=> IVOC4	; 0.1;          1.	; 6.412e-7	; 65.   
-IVOC5 <=> IVOC5	; 0.1;          1.	; 7.251e-6	; 61.   
-IVOC6 <=> IVOC6	; 0.1;          1.	; 8.342e-5	; 57.   
-IVOC7 <=> IVOC7	; 0.1;          1.	; 9.820e-4	; 54.   
-IVOC8 <=> IVOC8	; 0.1;          1.	; 1.200e-2	; 50.   
+IVOC2 <=> IVOC2	; 0.1;          1.	; 5.747e-8	; 73.  
+IVOC3 <=> IVOC3	; 0.1;          1.	; 7.251e-6	; 69.   
+IVOC4 <=> IVOC4	; 0.1;          1.	; 9.820e-4	; 65.   
+IVOC5 <=> IVOC5	; 0.1;          1.	; 4.760e-10	; 77.   
+IVOC6 <=> IVOC6	; 0.1;          1.	; 5.747e-8	; 73.   
+IVOC7 <=> IVOC7	; 0.1;          1.	; 7.251e-6	; 69.   
+IVOC8 <=> IVOC8	; 0.1;          1.	; 9.820e-4	; 65.   
 IVOC9 <=> IVOC9	; 0.1;          1.	; 1.530e-1	; 46.   
 !

@@ -154,6 +154,13 @@ MODULE StepASP
                 !Note above calls RegridAerosol automatically
                 !with recalculates radius and density
                 WRITE(*,*) "Cond Okay"
+                !DO WHILE(associated(cur))
+                !   write(*,*) cur%numberofparticles
+                !   write(*,*) sum(cur%AqChems)
+                !   write(*,*) sum(cur%OrgChems)
+                !   write(*,*) sum(cur%AQOrgChems)
+                !   cur=>cur%next
+               !ENDDO
             END IF
     
             !Step Coagulation, if desired
@@ -174,13 +181,13 @@ MODULE StepASP
 
             !write(*,*) 'Before SortAeroloslAtGridPointForCoagulation calling spillbeans'
             !call spillbeans()
-	    write(*,*) 'calling SortAerosolAtGridPointForCoagulation...'
+	    !write(*,*) 'calling SortAerosolAtGridPointForCoagulation...'
 
             CALL SortAerosolAtGridPointForCoagulation () 
 
-          write(*,*) 'done calling SortAerosolAtGridPointForCoagulation' !AD DEBUG
+          !write(*,*) 'done calling SortAerosolAtGridPointForCoagulation' !AD DEBUG
              cur => particles%first
-            write(*,*) 'L172 StepASP.f90 StepASPOnce call' !AD DEBUG
+            !write(*,*) 'L172 StepASP.f90 StepASPOnce call' !AD DEBUG
 !            I = 1
 
             DO WHILE(associated(cur))
@@ -197,9 +204,9 @@ MODULE StepASP
                 !Recalculate optical parameters
 		!write(*,*) 'Before ShellRefIndAndRad calling spillbeans'
 		!call spillbeans()
-                WRITE(*,*) "Call Optical, Particle #", I
+                !WRITE(*,*) "Call Optical, Particle #", I
                 CALL ShellRefIndAndRad(cur)
-                WRITE(*,*) "Optical Okay"
+                !WRITE(*,*) "Optical Okay"
                     
 !                I = I + 1
             
@@ -513,7 +520,7 @@ MODULE StepASP
 		! CMB add
         integer :: doAerosols != getAerosolProc()
 		real*8 :: filler_value, ro2_t, rco3_t
-        write(*,*) "Inside and beginning OutputConcentrations" !AD DEBUG
+        !write(*,*) "Inside and beginning OutputConcentrations" !AD DEBUG
         doAerosols = getAerosolProc()
 		filler_value = 1.0E-34
 		! end CMB add
@@ -796,10 +803,10 @@ MODULE StepASP
 									sza, Transmissivity)
 
         call flush(6)									
-		write(*,*) "In ASP Interface before StepASPOnce" !AD DEBUG
-		write(*,*) "TimeStep for StepASPOnce", TimeStep
+		!write(*,*) "In ASP Interface before StepASPOnce" !AD DEBUG
+		!write(*,*) "TimeStep for StepASPOnce", TimeStep
 		CALL StepASPOnce (TimeStep)
-                write(*,*) "In ASP Interface after StepASPOnce" !AD DEBUG
+                !write(*,*) "In ASP Interface after StepASPOnce" !AD DEBUG
 		CALL OutputConcentrations(Temp, Press, Dens, GasConc, &
 									NumConc, MassConc, &
 									ExtCoeff, SingScat, Assym, Radius, TermVel)
@@ -943,17 +950,21 @@ MODULE StepASP
           !do ntr=1,HowManyEvolveGasChems
 		!write(*,*) GasPhaseChemicalNames(ntr),cbsum_ppb(ntr)
 	  !enddo
-       if (iden.eq.11.and.zden.eq.32) then
-	write(*,*) 'In SAM Wrapper Before ASPInterface  '
-        do mm=1,HowManyOrgChems
-           write(*,*) OrgPhaseChemicalNames(mm),MassConc(:,mm+HowManyAqChems+HowManyAqCations+HowManyAqAnions)
-        enddo
-       endif
+       !if (iden.eq.11.and.zden.eq.32) then
+	!write(*,*) 'In SAM Wrapper Before ASPInterface  '
+        !do mm=1,HowManyOrgChems
+        !   write(*,*) OrgPhaseChemicalNames(mm),MassConc(:,mm+HowManyAqChems+HowManyAqCations+HowManyAqAnions)
+        !enddo
+       !endif
 
-      write(*,*) "sum (MassConc) SAM_Wrapper before ASPInt", sum(MassConc) 
+      !write(*,*) "sum (MassConc) SAM_Wrapper before ASPInt", sum(MassConc) 
       if (IsNaN(sum(MassConc)))then !AD DEBUG
             write(*,*) "NaN found" !AD DEBUG
       endif !AD DEBUG
+      write(*,*) "sum(NumConc) SAM_Wrapper before ASPInt", sum(NumConc)
+      if (IsNaN(sum(NumConc)))then
+            write(*,*) "NaN found"
+      endif
 
 
       !write(*,*) "In SAM_wrapper before ASPInterface" !AD DEBUG
@@ -999,12 +1010,12 @@ MODULE StepASP
       !write(*,*) "sum (solarzenithangle) SAM_Wrapper after ASPInt", solarzenithangle
       !write(*,*) "sum (Transmissivity) SAM_Wrapper after ASPInt", Transmissivity
 
-       if (iden.eq.11.and.zden.eq.32) then
-	write(*,*) 'In SAM Wrapper After ASPInterface  '
-        do mm=1,HowManyOrgChems
-           write(*,*) OrgPhaseChemicalNames(mm), MassConc(:,mm+HowManyAqChems+HowManyAqCations+HowManyAqAnions)
-        enddo
-       endif
+       !if (iden.eq.11.and.zden.eq.32) then
+	!write(*,*) 'In SAM Wrapper After ASPInterface  '
+        !do mm=1,HowManyOrgChems
+        !   write(*,*) OrgPhaseChemicalNames(mm), MassConc(:,mm+HowManyAqChems+HowManyAqCations+HowManyAqAnions)
+        !enddo
+       !endif
 	!write(*,*) "MassConc", sum(MassConc)
       if (IsNaN(sum(MassConc)))then !AD DEBUG
             write(*,*) "NaN found" !AD DEBUG

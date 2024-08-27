@@ -270,24 +270,24 @@
       gaer = 0.61            !MM DEBUG
       
       ! start MM DEBUG BLOCK
-      write(*,*) "tuv4samasp:L269 beginning of code" 
-      WRITE(*,*) "shape(samAOD) = ", shape(samAOD)
-      WRITE(*,*) "shape(samSSA) = ", shape(samSSA)
-      WRITE(*,*) "shape(samASYM) = ", shape(samASYM)
-      IF ( ANY( samAOD <= 0) ) then
-         WRITE(*,*) "samAOD has a bad value <= 0"
-         WRITE(*,*) "samAOD = ", samAOD
-      END IF
+      !write(*,*) "tuv4samasp:L269 beginning of code" 
+      !WRITE(*,*) "shape(samAOD) = ", shape(samAOD)
+      !WRITE(*,*) "shape(samSSA) = ", shape(samSSA)
+      !WRITE(*,*) "shape(samASYM) = ", shape(samASYM)
+      !IF ( ANY( samAOD <= 0) ) then
+      !   WRITE(*,*) "samAOD has a bad value <= 0"
+      !   WRITE(*,*) "samAOD = ", samAOD
+      !END IF
                 
-      IF ( ANY( samSSA < 0) .OR. ANY(samSSA > 1.0)) then
-         WRITE(*,*) "samSSA has a bad value < 0 OR > 1.0"
-         WRITE(*,*) "samSSA = ", samSSA
-      END IF
+      !IF ( ANY( samSSA < 0) .OR. ANY(samSSA > 1.0)) then
+      !   WRITE(*,*) "samSSA has a bad value < 0 OR > 1.0"
+      !   WRITE(*,*) "samSSA = ", samSSA
+      !END IF
                 
-      IF ( ANY( samASYM < -1.0) .OR. ANY(samASYM > 1.0)) then
-         WRITE(*,*) "samASYM has a bad value < -1.0 OR > 1.0"
-         WRITE(*,*) "samASYM = ", samASYM
-      END IF
+      !IF ( ANY( samASYM < -1.0) .OR. ANY(samASYM > 1.0)) then
+      !   WRITE(*,*) "samASYM has a bad value < -1.0 OR > 1.0"
+      !   WRITE(*,*) "samASYM = ", samASYM
+      !END IF
       ! end MM DEBUG BLOCK
 
 * re-entry point
@@ -488,7 +488,12 @@ c      izfix = 0
       nwint = -7
       tstart = samtstart
       nt = 1 !Only calculate one timestep
-      
+      lat = 47.9392
+      lon = -118.6183
+      tmzone = 0
+      iyear = 2019
+      imonth = 8
+      iday = 3 
 !END MJA 20190616 FORCED INPUTS      
       
       IF(nstr .LT. 2) THEN
@@ -756,25 +761,25 @@ c      CALL newlst(ns,slabel,nj,jlabel)
 *     !END MJA 20190616 SAM-ASP overwrites of aerosol parameters
 
       ! start MM DEBUG BLOCK
-      write(*,*) "tuv4samasp:L746 After SAM-ASP overwrites"
-      WRITE(*,*) "of aerosol parameters" 
-      WRITE(*,*) "shape(dtaer) = ", shape(dtaer)
-      WRITE(*,*) "shape(omaer) = ", shape(omaer)
-      WRITE(*,*) "shape(gaer) = ", shape(gaer)
-      IF ( ANY( dtaer <= 0) ) then
-         WRITE(*,*) "dtaer has a bad value <= 0"
-         WRITE(*,*) "dtaer = ", dtaer
-      ENDIF
+      !write(*,*) "tuv4samasp:L746 After SAM-ASP overwrites"
+      !WRITE(*,*) "of aerosol parameters" 
+      !WRITE(*,*) "shape(dtaer) = ", shape(dtaer)
+      !WRITE(*,*) "shape(omaer) = ", shape(omaer)
+      !WRITE(*,*) "shape(gaer) = ", shape(gaer)
+      !IF ( ANY( dtaer <= 0) ) then
+      !   WRITE(*,*) "dtaer has a bad value <= 0"
+      !   WRITE(*,*) "dtaer = ", dtaer
+      !ENDIF
                 
-      IF ( ANY( omaer < 0) .OR. ANY(omaer > 1.0)) then
-         WRITE(*,*) "omaer has a bad value < 0 OR > 1.0"
-         WRITE(*,*) "omaer = ", omaer
-      ENDIF
+      !IF ( ANY( omaer < 0) .OR. ANY(omaer > 1.0)) then
+      !   WRITE(*,*) "omaer has a bad value < 0 OR > 1.0"
+      !   WRITE(*,*) "omaer = ", omaer
+      !ENDIF
                 
-      IF ( ANY( gaer < -1.0) .OR. ANY(gaer > 1.0)) then
-         WRITE(*,*) "gaer has a bad value < -1.0 OR > 1.0"
-         WRITE(*,*) "gaer = ", gaer
-      ENDIF
+      !IF ( ANY( gaer < -1.0) .OR. ANY(gaer > 1.0)) then
+      !   WRITE(*,*) "gaer has a bad value < -1.0 OR > 1.0"
+      !   WRITE(*,*) "gaer = ", gaer
+      !ENDIF
       ! end MM DEBUG BLOCK
 
 * Snowpack physical and optical depths, single scattering albedo, asymmetry factor

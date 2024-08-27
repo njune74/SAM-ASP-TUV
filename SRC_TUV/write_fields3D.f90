@@ -21,9 +21,10 @@ implicit none
  character *6 filetype
  character *10 units
  character *12 c_z(nzm),c_p(nzm),c_dx, c_dy, c_time
-integer i,j,l,k,n,nfields,nfields1,binnum
+integer i,j,l,k,n,nfields,nfields1,binnum,irxn
 integer nbins,ntrtrack
 
+character(len=6),dimension(51) :: JValNames
 real tmp(nx,ny,nzm)
 !real TotalOA_01(nx,ny,nzm)
 !real TotalOA_02(nx,ny,nzm)
@@ -36,7 +37,25 @@ real tmp(nx,ny,nzm)
 !real TotalOA_09(nx,ny,nzm)
 !real TotalOA_10(nx,ny,nzm)
 
+real :: TotPOA(nx,ny,nzm) ! NJ 8/22/2023
+real :: TotSOA(nx,ny,nzm) ! NJ 8/22/2023
 real :: TotOA(nx,ny,nzm)
+real :: IVOC1Aer(nx,ny,nzm) ! NJ 8/28/2023
+real :: IVOC2Aer(nx,ny,nzm) 
+real :: IVOC3Aer(nx,ny,nzm)
+real :: IVOC4Aer(nx,ny,nzm)
+real :: IVOC5Aer(nx,ny,nzm)
+real :: IVOC6Aer(nx,ny,nzm)
+real :: IVOC7Aer(nx,ny,nzm)
+real :: IVOC8Aer(nx,ny,nzm)
+real :: IVOC1Gas(nx,ny,nzm)
+real :: IVOC2Gas(nx,ny,nzm)
+real :: IVOC3Gas(nx,ny,nzm)
+real :: IVOC4Gas(nz,ny,nzm)
+real :: IVOC5Gas(nz,ny,nzm)
+real :: IVOC6Gas(nz,ny,nzm)
+real :: IVOC7Gas(nz,ny,nzm)
+real :: IVOC8Gas(nz,ny,nzm) ! END NJ 8/28/2023
 !real TotH2O(nx,ny,nzm)
 real :: TotK(nx,ny,nzm)
 real :: TotNa(nx,ny,nzm)
@@ -107,9 +126,16 @@ Integer :: 	Kind,KNO3ind, KClind, K2SO4ind, KHSO4ind, KOHind, Naind , NaNO3ind, 
                 CBIOind,PD1ind,CPD1ind, CPD2ind,CPD3ind,HClind,H2SO4ind,AqIVOC1ind,AqIVOC2ind,&
                 AqIVOC3ind,AqIVOC4ind,AqIVOC5ind,AqIVOC6ind,AqIVOC7ind,AqIVOC8ind,AqIVOC9ind,&
                 AqPOA1ind,AqPOA2ind,AqPOA3ind,AqPOA4ind,AqPOA5ind,AqPOA6ind,AqPOA7ind,AqPOA8ind,&
-                AqLEVOind,AqCBIOind,AqCPD1ind,AqCPD2ind,AqCPD3ind
+                AqLEVOind,AqCBIOind,AqCPD1ind,AqCPD2ind,AqCPD3ind,IVOC1indg,IVOC2indg,&
+                IVOC3indg,IVOC4indg,IVOC5indg,IVOC6indg,IVOC7indg,IVOC8indg
 
 
+JValNames = (/'JVal01','JVal02','JVal03','JVal04','JVal05','JVal06','JVal07','JVal08','JVal09','JVal10', &
+            'JVal11','JVal12','JVal13','JVal14','JVal15','JVal16','JVal17','JVal18','JVal19','JVal20', &
+            'JVal21','JVal22','JVal23','JVal24','JVal25','JVal26','JVal27','JVal28','JVal29','JVal30',&
+            'JVal31','JVal32','JVal33','JVal34','JVal35','JVal36','JVal37','JVal38','JVal39','JVal40',&
+            'JVal41','JVal42','JVal43','JVal44','JVal45','JVal46','JVal47','JVal48','JVal49','JVal50',&
+            'JVal51'/)
 BCind = Find_Chem("BC01")
 Kind = Find_Chem("K+01")
 KNO3ind = Find_Chem("KNO301")
@@ -160,6 +186,25 @@ IVOC7ind = Find_Chem("IVOC701")
 IVOC8ind = Find_Chem("IVOC801")
 IVOC9ind = Find_Chem("IVOC901")
 
+! NJ 9/3/2023
+IVOC1indg = Find_Chem("IVOC1")
+IVOC2indg = Find_Chem("IVOC2")
+IVOC3indg = Find_Chem("IVOC3")
+IVOC4indg = Find_Chem("IVOC4")
+IVOC5indg = Find_Chem("IVOC5")
+IVOC6indg = Find_Chem("IVOC6")
+IVOC7indg = Find_Chem("IVOC7")
+IVOC8indg = Find_Chem("IVOC8")
+!IVOC9ind = Find_Chem("IVOC901")
+!write(*,*) "IVOC1 Gas Ind = ",IVOC1indg
+!write(*,*),"IVOC1 Aer Ind = ",IVOC1ind
+!write(*,*) "IVOC2 Gas Ind = ",IVOC2indg
+!write(*,*),"IVOC2 Aer Ind = ",IVOC2ind
+!write(*,*) "IVOC3 Gas Ind = ",IVOC3indg
+!write(*,*),"IVOC3 Aer Ind = ",IVOC3ind
+!write(*,*) "IVOC4 Gas Ind = ",IVOC4indg
+!write(*,*),"IVOC4 Aer Ind = ",IVOC4ind
+
 POA1ind = Find_Chem("POA101")
 POA2ind = Find_Chem("POA201")
 POA3ind = Find_Chem("POA301")
@@ -205,7 +250,7 @@ AqCPD3ind = Find_Chem("AqCPD301")
 
 !nfields=ntracers+ngas+3!! number of 3D fields to save 
 !nfields=41+10+19+60!! number of 3D fields to save
-nfields=130
+nfields=144 !130, adding Jvalues
 if(.not.docloud) nfields=nfields-1
 if(.not.doprecip) nfields=nfields-1
 !bloss: add 3D outputs for microphysical fields specified by flag_micro3Dout
@@ -467,7 +512,7 @@ end if
 
 
 write(*,*) 'In write_fields3D '
-do n=1,100
+do n=1,92
   nfields1=nfields1+1
 
    do i=1,nx
@@ -612,106 +657,6 @@ nfields1=nfields1+1
 
             end do ! end n
 
-            !if (TotOA(i,j,l).gt.2) then
-               !write(*,*)nstep, 'TotOA(',i,j,l,') = ', TotOA(i,j,l)
-               !do binnum=1,10
-
-               !cur_index = 86*(binnum-1)
-
-               !write(*,*) 'Org:'        
-
-               !write(*,*) tracername(POA1ind+cur_index),(tracer(i,j,l,(POA1ind+cur_index))*(airdenstm/Av*airmw)*1e12) 
-
-               !write(*,*) tracername(POA2ind+cur_index), (tracer(i,j,l,(POA2ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(POA3ind+cur_index),(tracer(i,j,l,(POA3ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(POA4ind+cur_index),(tracer(i,j,l,(POA4ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(POA5ind+cur_index),(tracer(i,j,l,(POA5ind+cur_index))*(airdenstm/Av*airmw)*1e12) 
-
-               !write(*,*) tracername(POA6ind+cur_index),(tracer(i,j,l,(POA6ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(POA7ind+cur_index),(tracer(i,j,l,(POA7ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(POA8ind+cur_index),(tracer(i,j,l,(POA8ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(LEVOind+cur_index),(tracer(i,j,l,(LEVOind+cur_index))*(airdenstm/Av*airmw)*1e12) 
-
-               !write(*,*) tracername(CBIOind+cur_index),(tracer(i,j,l,(CBIOind+cur_index))*(airdenstm/Av*airmw)*1e12) 
-
-               !write(*,*) tracername(CPD1ind+cur_index), (tracer(i,j,l,(CPD1ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(CPD2ind+cur_index),(tracer(i,j,l,(CPD2ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(CPD3ind+cur_index), (tracer(i,j,l,(CPD3ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC1ind+cur_index), (tracer(i,j,l,(IVOC1ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC2ind+cur_index), (tracer(i,j,l,(IVOC2ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC3ind+cur_index),(tracer(i,j,l,(IVOC3ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC4ind+cur_index),(tracer(i,j,l,(IVOC4ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC5ind+cur_index),(tracer(i,j,l,(IVOC5ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC6ind+cur_index),(tracer(i,j,l,(IVOC6ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC7ind+cur_index), (tracer(i,j,l,(IVOC7ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC8ind+cur_index),(tracer(i,j,l,(IVOC8ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(IVOC9ind+cur_index),(tracer(i,j,l,(IVOC9ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) 'AqOrg:'
-
-               !write(*,*) tracername(AqPOA1ind+cur_index),(tracer(i,j,l,(AqPOA1ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqPOA2ind+cur_index),(tracer(i,j,l,(AqPOA2ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqPOA3ind+cur_index),(tracer(i,j,l,(AqPOA3ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqPOA4ind+cur_index),(tracer(i,j,l,(AqPOA4ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqPOA5ind+cur_index),(tracer(i,j,l,(AqPOA5ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqPOA6ind+cur_index),(tracer(i,j,l,(AqPOA6ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqPOA7ind+cur_index),(tracer(i,j,l,(AqPOA7ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqPOA8ind+cur_index),(tracer(i,j,l,(AqPOA8ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqLEVOind+cur_index),(tracer(i,j,l,(AqLEVOind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqCBIOind+cur_index),(tracer(i,j,l,(AqCBIOind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqCPD1ind+cur_index),(tracer(i,j,l,(AqCPD1ind+cur_index))*(airdenstm/Av*airmw)*1e12) 
-
-               !write(*,*) tracername(AqCPD2ind+cur_index),(tracer(i,j,l, (AqCPD2ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqCPD3ind+cur_index),(tracer(i,j,l, (AqCPD3ind+cur_index))*(airdenstm/Av*airmw)*1e12) 
-
-               !write(*,*) tracername(AqIVOC1ind+cur_index),(tracer(i,j,l,(AqIVOC1ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC2ind+cur_index),(tracer(i,j,l,(AqIVOC2ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC3ind+cur_index),(tracer(i,j,l,(AqIVOC3ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC4ind+cur_index),(tracer(i,j,l,(AqIVOC4ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC5ind+cur_index),(tracer(i,j,l,(AqIVOC5ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC6ind+cur_index),(tracer(i,j,l,(AqIVOC6ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC7ind+cur_index),(tracer(i,j,l,(AqIVOC7ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC8ind+cur_index),(tracer(i,j,l,(AqIVOC8ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-
-               !write(*,*) tracername(AqIVOC9ind+cur_index),(tracer(i,j,l,(AqIVOC9ind+cur_index))*(airdenstm/Av*airmw)*1e12)
-               !end do
-            !endif
-
          end do	! end nz	
        end do! end ny
      end do! end nx!
@@ -720,6 +665,470 @@ name='TotOA'
 long_name='TotalOA'
 units = 'ug/m3'
 call compress3D(TotOA,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+! POA Output NJ 8/22/2023
+!write(*,*)'tracername array = ',tracername
+nfields1=nfields1+1
+
+    ! write(*,*)'TotOA = ', tracername(n),n
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotPOA(i,j,l) = 0.0
+            prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+            temptm = dble(tabs(i,j,l)) ! in K
+            airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               TotPOA(i,j,l) = TotPOA(i,j,l) + (tracer(i,j,l,(IVOC1ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+               TotPOA(i,j,l) = TotPOA(i,j,l) + (tracer(i,j,l,(IVOC2ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+               TotPOA(i,j,l) = TotPOA(i,j,l) + (tracer(i,j,l,(IVOC3ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+               TotPOA(i,j,l) = TotPOA(i,j,l) + (tracer(i,j,l,(IVOC4ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+            end do ! end n
+
+         end do ! end nz
+       end do! end ny
+     end do! end nx!
+
+name='POA'
+long_name='POA'
+units = 'ug/m3'
+call compress3D(TotPOA,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+! POA VOC Aerosol Output NJ 8/22/2023
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC1Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC1Aer(i,j,l) = IVOC1Aer(i,j,l) + (tracer(i,j,l,(IVOC1ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA1Aer'
+long_name='POA C*-2 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC1Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC2Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC2Aer(i,j,l) = IVOC2Aer(i,j,l) + (tracer(i,j,l,(IVOC2ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA2Aer'
+long_name='POA C*0 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC2Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC3Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC3Aer(i,j,l) = IVOC3Aer(i,j,l) + (tracer(i,j,l,(IVOC3ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA3Aer'
+long_name='POA C*2 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC3Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC4Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC4Aer(i,j,l) = IVOC4Aer(i,j,l) + (tracer(i,j,l,(IVOC4ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA4Aer'
+long_name='POA C*4 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC4Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+! POA VBS Output Gas NJ 8/24/2023
+nfields1=nfields1+1
+!write(*,*)'TRACERNAME START'
+!write(*,*)tracername
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC1Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      !write(*,*)'NameTest =', tracername(IVOC1ind)
+      !write(*,*)'GasPhaseTest = ', tracer(i,j,l,IVOC1ind) !NJ
+      IVOC1Gas(i,j,l) = IVOC1Gas(i,j,l) + (tracer(i,j,l,IVOC1indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA1Gas'
+long_name='POA C*-2 Gas'
+units = 'ug/m3'
+call compress3D(IVOC1Gas,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC2Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+      IVOC2Gas(i,j,l) = IVOC2Gas(i,j,l) + (tracer(i,j,l,IVOC2indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA2Gas'
+long_name='POA C*0 Gas'
+units = 'ug/m3'
+call compress3D(IVOC2Gas,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC3Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+      IVOC3Gas(i,j,l) = IVOC3Gas(i,j,l) + (tracer(i,j,l,IVOC3indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA3Gas'
+long_name='POA C*2 Gas'
+units = 'ug/m3'
+call compress3D(IVOC3Gas,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC4Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+      IVOC4Gas(i,j,l) = IVOC4Gas(i,j,l) + (tracer(i,j,l,IVOC4indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='POA4Gas'
+long_name='POA C*4 Gas'
+units = 'ug/m3'
+call compress3D(IVOC4Gas,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+! SOA Output NJ 8/22/2023
+nfields1=nfields1+1
+
+    ! write(*,*)'TotOA = ', tracername(n),n
+     do i=1,nx
+       do j=1,ny
+         do l=1,nzm
+            TotSOA(i,j,l) = 0.0
+            prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+            temptm = dble(tabs(i,j,l)) ! in K
+            airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+            do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               TotSOA(i,j,l) = TotSOA(i,j,l) + (tracer(i,j,l,(IVOC5ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+               TotSOA(i,j,l) = TotSOA(i,j,l) + (tracer(i,j,l,(IVOC6ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+               TotSOA(i,j,l) = TotSOA(i,j,l) + (tracer(i,j,l,(IVOC7ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+               TotSOA(i,j,l) = TotSOA(i,j,l) + (tracer(i,j,l,(IVOC8ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+            end do ! end n
+
+         end do ! end nz
+       end do! end ny
+     end do! end nx!
+
+name='SOA'
+long_name='SOA'
+units = 'ug/m3'
+call compress3D(TotSOA,nx,ny,nzm,name,long_name,units, &
+                      save3Dbin,dompi,rank,nsubdomains)
+
+! SOA VBS Output Aerosol Phase NJ 8/22/2023
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC5Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC5Aer(i,j,l) = IVOC5Aer(i,j,l) + (tracer(i,j,l,(IVOC5ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA1Aer'
+long_name='SOA C*-2 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC5Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC6Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC6Aer(i,j,l) = IVOC6Aer(i,j,l) + (tracer(i,j,l,(IVOC6ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA2Aer'
+long_name='SOA C*0 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC6Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC7Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC7Aer(i,j,l) = IVOC7Aer(i,j,l) + (tracer(i,j,l,(IVOC7ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA3Aer'
+long_name='SOA C*2 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC7Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC8Aer(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+      do binnum=1,10
+               !tmp(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+               !std(i,j,l)= tracer(i,j,l,(Kind+cur_index))*(airdenstm/Av*airmw)*1e12 ! kg/kg_air to ug/m3)
+
+               cur_index = 86*(binnum-1)
+               IVOC8Aer(i,j,l) = IVOC8Aer(i,j,l) + (tracer(i,j,l,(IVOC8ind+cur_index))*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+      end do ! end n
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA4Aer'
+long_name='SOA C*4 Aerosol'
+units = 'ug/m3'
+call compress3D(IVOC8Aer,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+! SOA VBS Output Gas Phase NJ 8/24/2023
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC5Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+      IVOC5Gas(i,j,l) = IVOC5Gas(i,j,l) + (tracer(i,j,l,IVOC5indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA1Gas'
+long_name='SOA C*-2 Gas'
+units = 'ug/m3'
+call compress3D(IVOC5Gas,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC6Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+      IVOC6Gas(i,j,l) = IVOC6Gas(i,j,l) + (tracer(i,j,l,IVOC6indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA2Gas'
+long_name='SOA C*0 Gas'
+units = 'ug/m3'
+call compress3D(IVOC6Gas,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC7Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+      IVOC7Gas(i,j,l) = IVOC7Gas(i,j,l) + (tracer(i,j,l,IVOC7indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA3Gas'
+long_name='SOA C*2 Gas'
+units = 'ug/m3'
+call compress3D(IVOC7Gas,nx,ny,nzm,name,long_name,units, &
+                                 save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      IVOC8Gas(i,j,l) = 0.0
+      prestm = dble(pres(l)*100.d0) + p(i,j,l) ! in Pa
+      temptm = dble(tabs(i,j,l)) ! in K
+      airdenstm = prestm*Av/(gasc*temptm)/1.0d6! in molec/cm3
+
+      IVOC8Gas(i,j,l) = IVOC8Gas(i,j,l) + (tracer(i,j,l,IVOC8indg)*(airdenstm/Av*airmw)*1e12) ! kg/kg_air to ug/m3)
+
+    end do ! end nz
+  end do! end ny
+end do! end nx!
+
+name='SOA4Gas'
+long_name='SOA C*4 Gas'
+units = 'ug/m3'
+call compress3D(IVOC8Gas,nx,ny,nzm,name,long_name,units, &
                                  save3Dbin,dompi,rank,nsubdomains)
 
 
@@ -1035,7 +1444,7 @@ call compress3D(TotCa,nx,ny,nzm,name,long_name,units, &
 
 ! Number of Particles (No...)
 
-do n=1477,1486
+do n=1479,1488
   nfields1=nfields1+1
    do i=1,nx
       do j=1,ny
@@ -1060,7 +1469,6 @@ do n=1477,1486
                                  save3Dbin,dompi,rank,nsubdomains)
 end do
 
-
 do n = 1,nmicro_fields
    if(docloud.AND.flag_micro3Dout(n).gt.0.AND.n.ne.index_water_vapor) then
       nfields1=nfields1+1
@@ -1080,6 +1488,60 @@ do n = 1,nmicro_fields
            save3Dbin,dompi,rank,nsubdomains)
    end if
 end do
+
+! Selected J Values
+nfields1=nfields1+1
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      tmp(i,j,l) = PhotoArr(i,j,l,2)
+    enddo
+  enddo
+enddo
+name=JValNames(2)
+long_name=JValNames(2)
+units= '1/s'
+call compress3D(tmp,nx,ny,nzm,name,long_name,units,save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      tmp(i,j,l) = PhotoArr(i,j,l,5)
+    enddo
+  enddo
+enddo
+name=JValNames(5)
+long_name=JValNames(5)
+units= '1/s'
+call compress3D(tmp,nx,ny,nzm,name,long_name,units,save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      tmp(i,j,l) = PhotoArr(i,j,l,12)
+    enddo
+  enddo
+enddo
+name=JValNames(12)
+long_name=JValNames(12)
+units= '1/s'
+call compress3D(tmp,nx,ny,nzm,name,long_name,units,save3Dbin,dompi,rank,nsubdomains)
+
+nfields1=nfields1+1
+do i=1,nx
+  do j=1,ny
+    do l=1,nzm
+      tmp(i,j,l) = PhotoArr(i,j,l,14)
+    enddo
+  enddo
+enddo
+name=JValNames(14)
+long_name=JValNames(14)
+units= '1/s'
+call compress3D(tmp,nx,ny,nzm,name,long_name,units,save3Dbin,dompi,rank,nsubdomains)
+
 
   call task_barrier()
 

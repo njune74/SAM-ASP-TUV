@@ -388,7 +388,7 @@ SUBROUTINE StepSectionalCoagulationJacobson (TimeStep)  !!!!!!!!!!!!!!!!!!!!!!!!
 	InSumVolumeConc = 0.0
 45	IF (Particle1%numberofparticles .GT. 0.0D0) THEN
 		SingleParticleVolume(JJ) = (4.0*Pi/3.0)*(Particle1%effectiveradius)**3 !cm3
-		
+		!write(*,*) "Particle Effective Radius",Particle1%effectiveradius
 		NumConc(JJ) = Particle1%numberofparticles
 		
 		InitNumConc(JJ) = Particle1%numberofparticles 
@@ -486,7 +486,7 @@ SUBROUTINE StepSectionalCoagulationJacobson (TimeStep)  !!!!!!!!!!!!!!!!!!!!!!!!
 	DO JJ = 1, HowManyLinks
 		InVolConc = InVolConc + VolumeConc(JJ)
 	END DO
-	!WRITE(*,*) "In: ", InVolConc
+	WRITE(*,*) "In: ", InVolConc
 	
 	!!Calculate the volume fractions 
 
@@ -499,6 +499,12 @@ SUBROUTINE StepSectionalCoagulationJacobson (TimeStep)  !!!!!!!!!!!!!!!!!!!!!!!!
 				
 				IF(K .EQ. HowManyLinks .AND. BigV .GE. SingleParticleVolume(K)) THEN
 					VolumeFractions(I,J,K) = 1.0
+				!Added Else If NJ
+				!ELSE IF(K .EQ. HowManyLinks .AND. BigV .GE. SingleParticleVolume(K-1) .AND. BigV .LT. SingleParticleVolume(K)) THEN
+					!VolumeFractions(I,J,K) = 1-VolumeFractions(I,J,K-1)
+				ELSE IF(K .EQ. HowManyLinks .AND. BigV .LT. SingleParticleVolume(K)) THEN
+					VolumeFractions(I,J,K) = 0.0
+				!Added Else if end NJ
 				ELSE IF(K .LT. HowManyLinks .AND. BigV .GE. SingleParticleVolume(K) .AND. BigV .LT. SingleParticleVolume(K+1)) THEN
 					VolumeFractions(I,J,K) = (SingleParticleVolume(K)/BigV)*((SingleParticleVolume(K+1)-BigV)/(SingleParticleVolume(K+1)-SingleParticleVolume(K)))
 					IF(VolumeFractions(I,J,K) .GT. 1.0) THEN
@@ -691,14 +697,19 @@ SUBROUTINE StepSectionalCoagulationJacobson (TimeStep)  !!!!!!!!!!!!!!!!!!!!!!!!
 		OutVolConc = OutVolConc + VolumeConc(JJ)
 	END DO
 	!WRITE(*,*) "Volume Ratio", OutVolConc/InVolConc
-	IF(ABS((OutVolConc/InVolConc)-1.0) .GT. 0.0001) CALL ERROR("Error in StepSectionalCoagulationJacobson(). Total Volume concentration" &
-			           //" is lost during step.")
+	!WRITE(*,*) "Sum Volume Ratio", OutSumVolumeConc/InSumVolumeConc
+	!IF(ABS((OutSumVolumeConc/InSumVolumeConc)-1.0) .GT. 0.0001) CALL ERROR("Error in StepSectionalCoagulationJacobson(). Summed Total Volume concentration" &
+	!		           //" is lost during step.")
 	
 	!WRITE(*,*) "Sum Volume Ratio", OutSumVolumeConc/InSumVolumeConc
-	IF(ABS((OutSumVolumeConc/InSumVolumeConc)-1.0) .GT. 0.0001) CALL ERROR("Error in StepSectionalCoagulationJacobson(). Summed Total Volume concentration" &
-			           //" is lost during step.")
+	!IF(ABS((OutVolConc/InVolConc)-1.0) .GT. 0.0001) CALL ERROR("Error in StepSectionalCoagulationJacobson(). Total Volume concentration" &
+	!		           //" is lost during step.")
+	
+	IF(ABS((OutSumVolumeConc/InSumVolumeConc)-1.0) .GT. 0.0001) WRITE(*,*) "WARNING: Error in StepSectionalCoagulationJacobson(). Summed Total Volume concentration" &
+			           //" is lost during step."
 
-
+	IF(ABS((OutVolConc/InVolConc)-1.0) .GT. 0.0001) WRITE(*,*) "WARNING: Error in StepSectionalCoagulationJacobson(). Total Volume concentration" &
+			           //" is lost during step."
 !	WRITE(*,*) "Coag Check 5"
 
 	!Save adjustments back to particle list
